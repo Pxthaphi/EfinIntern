@@ -1,0 +1,13 @@
+.types-filter{
+    padding: 16px 16px;
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--button-radius);
+    padding: 16px;
+}
+/* #year-filter-selector{
+    height: 45px;
+    align-self: end;
+    font-size: 16px;
+    padding: 0px 16px;
+   
+} */

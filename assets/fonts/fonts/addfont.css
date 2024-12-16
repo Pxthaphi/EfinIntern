@@ -1,0 +1,238 @@
+@font-face {
+    /*font-family: 'fc_minimalthin';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Thin-ver-110.eot');
+    src: url('FC-Minimal-Thin-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Thin-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Thin-ver-110.woff') format('woff'),
+         url('FC-Minimal-Thin-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Thin-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalthin_italic';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Thin-Italic-ver-110.eot');
+    src: url('FC-Minimal-Thin-Italic-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Thin-Italic-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Thin-Italic-ver-110.woff') format('woff'),
+         url('FC-Minimal-Thin-Italic-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Thin-Italic-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 100;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalextralight';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-ExtraLight-ver-110.eot');
+    src: url('FC-Minimal-ExtraLight-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-ExtraLight-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-ExtraLight-ver-110.woff') format('woff'),
+         url('FC-Minimal-ExtraLight-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-ExtraLight-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 200;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalextralight_italic';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-ExtraLight-Italic-ver-110.eot');
+    src: url('FC-Minimal-ExtraLight-Italic-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-ExtraLight-Italic-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-ExtraLight-Italic-ver-110.woff') format('woff'),
+         url('FC-Minimal-ExtraLight-Italic-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-ExtraLight-Italic-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 200;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimallight';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Light-ver-110.eot');
+    src: url('FC-Minimal-Light-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Light-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Light-ver-110.woff') format('woff'),
+         url('FC-Minimal-Light-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Light-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimallight_italic';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Light-Italic-ver-110.eot');
+    src: url('FC-Minimal-Light-Italic-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Light-Italic-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Light-Italic-ver-110.woff') format('woff'),
+         url('FC-Minimal-Light-Italic-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Light-Italic-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalregular';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Regular-ver-110.eot');
+    src: url('FC-Minimal-Regular-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Regular-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Regular-ver-110.woff') format('woff'),
+         url('FC-Minimal-Regular-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Regular-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalitalic';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Italic-ver-110.eot');
+    src: url('FC-Minimal-Italic-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Italic-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Italic-ver-110.woff') format('woff'),
+         url('FC-Minimal-Italic-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Italic-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalmedium';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Medium-ver-110.eot');
+    src: url('FC-Minimal-Medium-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Medium-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Medium-ver-110.woff') format('woff'),
+         url('FC-Minimal-Medium-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Medium-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalmedium_italic';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Medium-Italic-ver-110.eot');
+    src: url('FC-Minimal-Medium-Italic-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Medium-Italic-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Medium-Italic-ver-110.woff') format('woff'),
+         url('FC-Minimal-Medium-Italic-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Medium-Italic-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalsemibold';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-SemiBold-ver-110.eot');
+    src: url('FC-Minimal-SemiBold-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-SemiBold-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-SemiBold-ver-110.woff') format('woff'),
+         url('FC-Minimal-SemiBold-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-SemiBold-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalsemibold_italic';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-SemiBold-Italic-ver-110.eot');
+    src: url('FC-Minimal-SemiBold-Italic-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-SemiBold-Italic-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-SemiBold-Italic-ver-110.woff') format('woff'),
+         url('FC-Minimal-SemiBold-Italic-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-SemiBold-Italic-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalbold';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Bold-ver-110.eot');
+    src: url('FC-Minimal-Bold-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Bold-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Bold-ver-110.woff') format('woff'),
+         url('FC-Minimal-Bold-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Bold-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalbold_italic';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Bold-Italic-ver-110.eot');
+    src: url('FC-Minimal-Bold-Italic-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Bold-Italic-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Bold-Italic-ver-110.woff') format('woff'),
+         url('FC-Minimal-Bold-Italic-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Bold-Italic-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalextrabold';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-ExtraBold-ver-110.eot');
+    src: url('FC-Minimal-ExtraBold-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-ExtraBold-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-ExtraBold-ver-110.woff') format('woff'),
+         url('FC-Minimal-ExtraBold-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-ExtraBold-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalextrabold_italic';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-ExtraBold-Italic-ver-110.eot');
+    src: url('FC-Minimal-ExtraBold-Italic-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-ExtraBold-Italic-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-ExtraBold-Italic-ver-110.woff') format('woff'),
+         url('FC-Minimal-ExtraBold-Italic-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-ExtraBold-Italic-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 800;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalblack';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Black-ver-110.eot');
+    src: url('FC-Minimal-Black-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Black-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Black-ver-110.woff') format('woff'),
+         url('FC-Minimal-Black-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Black-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    /*font-family: 'fc_minimalblack_italic';*/
+    font-family: 'FC Minimal';
+    src: url('FC-Minimal-Black-Italic-ver-110.eot');
+    src: url('FC-Minimal-Black-Italic-ver-110.eot?#iefix') format('embedded-opentype'),
+         url('FC-Minimal-Black-Italic-ver-110.woff2') format('woff2'),
+         url('FC-Minimal-Black-Italic-ver-110.woff') format('woff'),
+         url('FC-Minimal-Black-Italic-ver-110.ttf')  format('truetype'),
+         url('FC-Minimal-Black-Italic-ver-110.svg#FC Minimal') format('svg');
+    font-weight: 900;
+    font-style: italic;
+    font-display: swap;
+}
+body {
+
+    font-family: "FC Minimal";
+}

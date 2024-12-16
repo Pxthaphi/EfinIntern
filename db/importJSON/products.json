@@ -1,0 +1,44 @@
+[
+	{
+		"id": 1,
+		"image": "bike-1.jpeg",
+		"name": "Orient Vita Pro 28",
+		"price": "284.50",
+		"quantity": 11
+	},
+	{
+		"id": 2,
+		"image": "bike-2.jpeg",
+		"name": "Orient S-400 26",
+		"price": "198.00",
+		"quantity": 12
+	},
+	{
+		"id": 3,
+		"image": "bike-3.jpeg",
+		"name": "Bullet Bora 20",
+		"price": "240.99",
+		"quantity": 31
+	},
+	{
+		"id": 4,
+		"image": "bike-4.jpeg",
+		"name": "Speed king 26",
+		"price": "345.99",
+		"quantity": 7
+	},
+	{
+		"id": 5,
+		"image": "bike-5.jpeg",
+		"name": "Speed king 26",
+		"price": "420.50",
+		"quantity": 7
+	},
+	{
+		"id": 6,
+		"image": "bike-6.jpeg",
+		"name": "Offroad X STS 26",
+		"price": "399.00",
+		"quantity": 7
+	}
+]

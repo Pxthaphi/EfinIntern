@@ -1,0 +1,309 @@
+:root{
+    /* color logo*/
+    --primary-color : #4FC950;
+
+	/* color text*/
+    --nav-text-color: #000000;
+	--text-white : #ffffff;
+    --text-nav-color : #012533;
+    --text-header-card-color : #000000;
+    --text-sub-status : #AFAFAF;
+    --text-name-color : #666666;
+    --text-footer-copy : #75BC1E;
+
+    /* color border*/
+     --border-color : #DFDFDF;
+
+    /* color background*/
+    --background-nav-green :#E3FFE4;
+    --background-footer : #000000;
+    --background-hero: #000000;
+
+     /* fonts-size */
+
+    --header-section : 48px;
+    --nav-button-body : 16px;
+    --card-body-title : 20px;
+    --card-caption : 13px;
+
+    /* font-weight*/
+    --fw-100 : 100;
+    --fw-200 : 200;
+    --fw-300 : 300;
+    --fw-400 : 400;
+    --fw-500 : 500;
+    --fw-600 : 600;
+    --fw-700 : 700;
+	  --fw-800 : 800;
+    --fw-900 : 900;
+
+     /* pad-ding */
+     --pd-28px : 28px;
+     --pd-30px : 30px;
+     --pd-40px : 40px;  
+     --pd-66px : 66px;
+     --pd-75px : 75px;
+    
+    /* btn */
+	--btn-regis-spac : 13px 24px;
+    --btn-nav-spac : 13px 16px;
+    --btn-color-hover: #179928;
+
+    /* radius */
+    --button-radius : 50px;
+    --card-radius: 20px;
+
+    /* border width */
+    --border-width: 0.5px
+}
+
+:root {
+  --color-bg1: rgb(8, 10, 15);
+  --color-bg2: rgb(0, 17, 32);
+  --color1: 80, 200, 120;
+  --color2: 79, 201, 79; 
+  --color3: 30, 135, 55;
+  --color4: 56, 150, 70;
+  --color5: 88, 209, 42;
+  --color-interactive: 79, 201, 79;
+  --circle-size: 78.6%;
+  --blending: hard-light;
+}
+
+@keyframes moveInCircle {
+  0% {
+      transform: rotate(0deg);
+  }
+  50% {
+      transform: rotate(180deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes moveInCircle {
+  0% {
+      -webkit-transform: rotate(0deg);
+  }
+  50% {
+      -webkit-transform: rotate(180deg);
+  }
+  100% {
+      -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes moveVertical {
+  0% {
+      transform: translateY(-50%);
+  }
+  50% {
+      transform: translateY(50%);
+  }
+  100% {
+      transform: translateY(-50%);
+  }
+}
+
+@-webkit-keyframes moveVertical {
+  0% {
+      -webkit-transform: translateY(-50%);
+  }
+  50% {
+      -webkit-transform: translateY(50%);
+  }
+  100% {
+      -webkit-transform: translateY(-50%);
+  }
+}
+
+@keyframes moveHorizontal {
+  0% {
+      transform: translateX(-50%) translateY(-10%);
+  }
+  50% {
+      transform: translateX(50%) translateY(10%);
+  }
+  100% {
+      transform: translateX(-50%) translateY(-10%);
+  }
+}
+
+@-webkit-keyframes moveHorizontal {
+  0% {
+      -webkit-transform: translateX(-50%) translateY(-10%);
+  }
+  50% {
+      -webkit-transform: translateX(50%) translateY(10%);
+  }
+  100% {
+      -webkit-transform: translateX(-50%) translateY(-10%);
+  }
+}
+
+.gradient-bg {
+  width: 92%;
+  height: 280px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  overflow: hidden;
+  /* background: linear-gradient(40deg, var(--color-bg1), var(--color-bg2)); */
+  z-index: 1;
+  border-radius: 20px;
+}
+@media screen and (min-width:2400px) {
+  .gradient-bg{
+    width: 95%;
+  }
+}
+@media screen and (min-width:4000px) {
+  .gradient-bg{
+    width: 97%;
+  }
+}
+.gradient-bg .svgBlur {
+  display: none;
+}
+
+.gradient-bg .noiseBg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  mix-blend-mode: soft-light;
+  opacity: 0.3;
+}
+
+.gradient-bg .gradients-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  filter: url(#goo) blur(40px);
+  -webkit-filter: blur(40px);
+}
+
+.gradient-bg .g1 {
+  position: absolute;
+  background: radial-gradient(circle at center, rgba(var(--color1), 0.8) 0, rgba(var(--color1), 0) 50%) no-repeat;
+  mix-blend-mode: var(--blending);
+  width: var(--circle-size);
+  height: var(--circle-size);
+  top: calc(50% - var(--circle-size) / 2);
+  left: calc(50% - var(--circle-size) / 2);
+  transform-origin: center center;
+  animation: moveVertical 30s ease infinite;
+  -webkit-animation: moveVertical 30s ease infinite;
+  opacity: 1;
+}
+
+.gradient-bg .g2 {
+  position: absolute;
+  background: radial-gradient(circle at center, rgba(var(--color2), 0.8) 0, rgba(var(--color2), 0) 50%) no-repeat;
+  mix-blend-mode: multiply;
+  width: var(--circle-size);
+  height: var(--circle-size);
+  top: calc(50% - var(--circle-size) / 2);
+  left: calc(50% - var(--circle-size) / 2);
+  transform-origin: calc(50% - 400px);
+  animation: moveInCircle 20s reverse infinite;
+  -webkit-animation: moveInCircle 20s reverse infinite;
+  opacity: 1;
+}
+
+.gradient-bg .g3 {
+  position: absolute;
+  background: radial-gradient(circle at center, rgba(var(--color3), 0.8) 0, rgba(var(--color3), 0) 50%) no-repeat;
+  mix-blend-mode: multiply;
+  width: var(--circle-size);
+  height: var(--circle-size);
+  top: calc(50% - var(--circle-size) / 2 + 200px);
+  left: calc(50% - var(--circle-size) / 2 - 500px);
+  transform-origin: calc(50% + 400px);
+  animation: moveInCircle 40s linear infinite;
+  -webkit-animation: moveInCircle 40s linear infinite;
+  opacity: 1;
+}
+
+.gradient-bg .g4 {
+  position: absolute;
+  background: radial-gradient(circle at center, rgba(var(--color4), 0.8) 0, rgba(var(--color4), 0) 50%) no-repeat;
+  mix-blend-mode: var(--blending);
+  width: var(--circle-size);
+  height: var(--circle-size);
+  top: calc(50% - var(--circle-size) / 2);
+  left: calc(50% - var(--circle-size) / 2);
+  transform-origin: calc(50% - 200px);
+  animation: moveHorizontal 40s ease infinite;
+  -webkit-animation: moveHorizontal 40s ease infinite;
+  opacity: 0.8;
+}
+
+.gradient-bg .g5 {
+  position: absolute;
+  background: radial-gradient(circle at center, rgba(var(--color5), 0.8) 0, rgba(var(--color5), 0) 50%) no-repeat;
+  mix-blend-mode: var(--blending);
+  width: calc(var(--circle-size) * 2);
+  height: calc(var(--circle-size) * 2);
+  top: calc(50% - var(--circle-size));
+  left: calc(50% - var(--circle-size));
+  transform-origin: calc(50% - 800px) calc(50% + 200px);
+  animation: moveInCircle 20s ease infinite;
+  -webkit-animation: moveInCircle 20s ease infinite;
+  opacity: 0.8;
+}
+
+.gradient-bg .interactive {
+  position: absolute;
+  background: radial-gradient(circle at center, rgba(var(--color-interactive), 0.8) 0, rgba(var(--color-interactive), 0) 50%) no-repeat;
+  mix-blend-mode: var(--blending);
+  width: 100%;
+  height: 100%;
+  top: -50%;
+  left: -50%;
+  opacity: 0.7;
+}
+
+.banner-wrapper {
+  position: relative;
+}
+
+.banner-section {
+  top: 0px;
+  position: relative;
+  z-index: 2;
+}
+
+@media only screen and (max-width: 767.98px) {
+  .gradient-bg {
+      width: 90%;
+      height: 240px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      overflow: hidden;
+      /* background: linear-gradient(40deg, var(--color-bg1), var(--color-bg2)); */
+      z-index: 1;
+      border-radius: 20px;
+  }
+}
+
+@media only screen and (max-width: 576px) {
+  .gradient-bg {
+      width: 95%;
+      height: 150px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      overflow: hidden;
+      /* background: linear-gradient(40deg, var(--color-bg1), var(--color-bg2)); */
+      z-index: 1;
+      border-radius: 20px;
+  }
+}

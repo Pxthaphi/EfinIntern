@@ -1,0 +1,148 @@
+.fs-16 ,.nav-text{
+    font-size: var(--nav-button-body);
+}
+.active-button{
+    background-color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    padding: 13px 24px;
+    width: auto;
+    height: 45px;
+    border-radius: var(--button-radius);
+    &:hover{
+        background-color: var(--btn-color-hover);
+    }
+}
+.border-footer{
+    background-color: var(--background-footer);
+    border-top-left-radius: var(--card-radius);
+    border-top-right-radius: var(--card-radius);
+    width: 100%;
+    padding-top: 66px;
+    padding-bottom: 30px;
+}
+.footer-font{
+    font-size: 16px;
+    margin-top: 33px;
+    font-weight: 300;
+    color: var(--text-sub-status);
+    margin-bottom: 0px;
+}
+.copyright-text{
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-sub-status);
+}
+.footer-gap{
+    column-gap: 16px;
+}
+
+.footer-content{
+    margin-bottom: 66px;
+}
+.header-nav{
+    margin-top: 28px;
+    margin-bottom: 28px;
+}
+#navbtn{
+    margin-left: 40px;
+}
+.highlight-hero-text{
+    color: var(--primary-color);
+    background-color: transparent;
+    z-index: 3;
+}
+.divider-logo{
+    height: 40px;
+    width: var(--border-width);
+    border-left: var(--border-width) solid var(--border-color);
+    margin: 0px 18px;
+}
+.divider-logo-footer{
+    width: var(--border-width);
+    border-left: var(--border-width) solid #444444;
+    height: 40px;
+    margin: 0px 18px;
+}
+.efinLogo{
+    display: block;
+}
+@media screen and (max-width: 990.98px) {
+    .efinLogo{
+        width: 300px;
+    }
+}
+@media screen and (max-width: 767.99px) {
+   #btn-footer{
+    margin: 20px 0px;
+    font-size: 13px;
+    width: max-content;
+   }
+   .copyright-text{
+    text-align: start;
+    padding-left: 0px;
+   }
+   .footer-content{
+    margin-bottom: 20px;
+   }
+   .border-footer{
+    padding: 32px 0px;
+
+   }
+   .footer-font{
+    margin-top: 20px;
+    }
+   .header-nav{
+    margin-top: 32px;
+    margin-bottom: 32px;
+   }
+   #navbtn{
+    margin-left: 16px;
+    }
+    .nav-text{
+        font-size: 13px;
+    }
+    .efinLogo{
+        width: 250px;
+    }
+    .internLogo{
+        width: 130px;
+    }
+    .divider-logo-footer{
+        height: 24px !important;
+    }
+    .active-button{
+        padding: 8px 16px;
+        width: auto;
+        height: 32px;
+    }
+    .footer--fixed .wrapper{
+        padding-bottom: 32px;
+    }
+    
+}
+
+@media screen and (max-width: 575.89px){
+    .internLogo{
+        width: 120px;
+    }
+    .divider-logo{
+        margin: 0px 8px;
+        height: 24px ;
+    }
+    .footer-font{
+        margin-top: 20px;
+        font-size: 13px;
+    }
+    .copyright-text{
+        font-size: 11px;
+    }
+    .efinLogo{
+        width: 200px;
+    }
+}
+@media screen and (max-width: 412px){
+    .efinLogo{
+        width: 150px;
+    }
+}
