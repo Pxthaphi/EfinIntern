@@ -348,7 +348,7 @@ if ($file_name && file_exists('data/' . $file_name)) {
 									echo "
 										<div class='carousel-item $activeClass'>
 											<div class='warpper-carousel gx-0 row d-flex justify-content-center'>
-											<img src='$imagePath' class='col-sm-10' alt='Image " . ($index + 1) . "' loading='lazy'>
+											<img src='$imagePath' class='' alt='Image " . ($index + 1) . "' loading='lazy'>
 											</div>
 										</div>
 										";

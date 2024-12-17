@@ -3,18 +3,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-function compress_image($source, $destination, $quality) {
-    $image = imagecreatefromstring(file_get_contents($source));
-    if (!$image) {
-        return false;
-    }
-
-    // แปลงเป็นไฟล์ webp และบีบอัดตามคุณภาพ
-    $result = imagewebp($image, $destination, $quality);
-    imagedestroy($image);
-    return $result;
-}
-
 if (!empty($_FILES['file']['name'][0])) {
     $upload_dir = '../../../assets/images/project/slideshow/';
 
@@ -37,33 +25,33 @@ if (!empty($_FILES['file']['name'][0])) {
 
         // ตรวจสอบว่าไฟล์เป็นรูปภาพที่รองรับ
         if (in_array($file_extension, ['jpg', 'jpeg', 'png'])) {
-            $upload_file = $upload_dir . $new_name;
+            $image = @imagecreatefromstring(file_get_contents($tmp_name));
+            if ($image) {
+                // ตรวจสอบขนาดของไฟล์ภาพ
+                $file_size = filesize($tmp_name); // ขนาดไฟล์ในไบต์
+                $max_size = 300 * 1024; // 300 KB in bytes
 
-            // เริ่มต้นคุณภาพสูงสุดที่ 80 (สามารถปรับได้)
-            $quality = 80;
-
-            // ตรวจสอบขนาดไฟล์หลังจากบีบอัด
-            $success = false;
-            do {
-                // เรียกใช้ฟังก์ชันบีบอัดภาพ
-                $success = compress_image($tmp_name, $upload_file, $quality);
-                if (!$success) {
-                    echo "Failed to compress image: $name\n";
-                    break;
+                // ถ้าขนาดไฟล์ใหญ่กว่า 300KB ให้ทำการลดคุณภาพ
+                if ($file_size > $max_size) {
+                    $quality = 75;  // Set desired quality (0-100 scale)
+                } else {
+                    $quality = 90;  // Higher quality if file size is within limit
                 }
 
-                clearstatcache();  // ล้าง cache ขนาดไฟล์
-                $file_size = filesize($upload_file); // ตรวจสอบขนาดไฟล์
-                $quality -= 5; // ลดคุณภาพเพื่อให้ขนาดไฟล์ลดลง
+                // เปลี่ยนเป็นรูป WebP โดยใช้คุณภาพที่ตั้งค่า
+                $upload_file = $upload_dir . $new_name;
+                $result = imagewebp($image, $upload_file, $quality); // Save as WebP with quality setting
 
-            } while ($file_size > 300 * 1024 && $quality > 10); // หยุดเมื่อขนาดไฟล์ไม่เกิน 300KB หรือคุณภาพต่ำกว่า 10
+                imagedestroy($image);
 
-            // ถ้าขนาดไฟล์ไม่เกิน 300KB จะได้ไฟล์แล้ว
-            if ($file_size <= 300 * 1024) {
-                echo "File uploaded and converted to WebP: $upload_file\n";
-                $uploaded_files = $new_name;  // เก็บชื่อไฟล์
+                if ($result) {
+                    echo "File uploaded and converted to WebP: $upload_file\n";
+                    $uploaded_files[] = $new_name;  // Store the file name
+                } else {
+                    echo "Failed to convert image to WebP: $name\n";
+                }
             } else {
-                echo "Failed to compress image below 300KB for: $name\n";
+                echo "Invalid image file: $name\n";
             }
         } else {
             echo "Unsupported file format: $name\n";
@@ -79,4 +67,3 @@ if (!empty($_FILES['file']['name'][0])) {
 } else {
     echo "No files uploaded.";
 }
-?>

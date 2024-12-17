@@ -3,6 +3,9 @@
 			@Import	Function
 	===============================
 */
+
+@import '../../../../../assets/fonts/fonts/addfont.css';
+
 /*
 	===============================
 			@Import	Mixins
@@ -62,6 +65,11 @@ strong {
 
 code {
   color: #e7515a;
+}
+
+/* sweetalert */
+.swal2-popup {
+  font-family: 'FC Minimal';
 }
 
 /*Page title*/

@@ -3,6 +3,8 @@
 			@Import	Function
 	===============================
 */
+@import '../../../../../../assets/fonts/fonts/addfont.css';
+
 /*
 	===============================
 			@Import	Mixins
@@ -17,7 +19,6 @@
 
 .featured-image {
   position: relative;
-  background: lightblue url("../../../img/lightbox-2.jpeg") no-repeat fixed center;
   height: 650px;
   background-position: center;
   background-size: cover;
@@ -25,13 +26,23 @@
   border-radius: 20px;
   overflow: hidden;
 }
+.featured-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* ใช้ cover ถ้าต้องการให้ภาพเต็มกรอบโดยไม่เบียดเบน */
+  border-radius: 20px;
+}
+
 .featured-image .featured-image-overlay {
   position: absolute;
   height: 100%;
   width: 100%;
   z-index: 0;
-  background-color: rgba(22, 28, 36, 0.72);
+  background-color: rgba(22, 28, 36, 0.4); /* เพิ่มความใสให้พื้นหลัง */
+  border-radius: 15px; /* เพิ่มมุมโค้งให้ขอบ */
+  box-shadow: 0 0 30px rgba(22, 28, 36, 0.8); /* เบลอขอบให้เนียน */
 }
+
 .featured-image .post-header {
   max-width: 1152px;
   margin: 0 auto;
@@ -80,14 +91,12 @@
 .featured-image .post-meta-info .media .media-body p {
   color: #e0e6ed;
 }
-.featured-image .post-meta-info .btn-share {
-  padding: 7.5px 9px;
-}
 
 .post-content {
   margin: 0 auto;
   padding: 48px 0;
   padding-bottom: 0;
+  font-family: 'FC Minimal';
 }
 .post-content p {
   font-size: 15px;
@@ -95,7 +104,11 @@
   color: #3b3f5c;
 }
 .post-content img {
-  border-radius: 8px;
+  border-radius: 12px;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover; /* หรือ object-fit: contain; ขึ้นอยู่กับการจัดตำแหน่งของรูป */
 }
 .post-content .full-width {
   width: 100%;

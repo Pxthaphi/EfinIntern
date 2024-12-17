@@ -1,12 +1,3 @@
-<?php
-include "../../db/connection.php";
-
-if (isset($_GET['delete'])) {
-    $delete_id = $_GET['delete'];
-    $sql = "DELETE FROM project WHERE Project_ID = $delete_id";
-    $stmt = mysqli_query($conn, $sql);
-} 
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -120,13 +111,25 @@ if (isset($_GET['delete'])) {
                                 <?php
                                 include '../../db/connection.php';
 
-                                $sql = "SELECT project.*, user.User_Image , intern.*, projectimages.*
-                                        FROM `project`
-                                        JOIN user ON user.User_ID = project.Project_UserID
-                                        JOIN intern ON user.User_ID = intern.User_ID
-                                        JOIN projectimages ON project.Project_ID = projectimages.Project_ID";
+                                $sql = "SELECT project.*, 
+                                            GROUP_CONCAT(projectimages.ProjectImages_ID) AS ProjectImages_IDs, 
+                                            GROUP_CONCAT(projectimages.Cover_Path) AS Cover_Paths, 
+                                            GROUP_CONCAT(projectimages.Slideshow_Path) AS Slideshow_Paths,
+                                            GROUP_CONCAT(user.User_Image) AS User_Images, 
+                                            GROUP_CONCAT(user.User_ID) AS User_IDs, 
+                                            GROUP_CONCAT(intern.Intern_StartDate) AS Intern_StartDates
+                                        FROM `project` 
+                                        JOIN projectimages ON project.Project_ID = projectimages.Project_ID
+                                        JOIN projectusers ON project.Project_ID = projectusers.Project_ID 
+                                        JOIN user ON projectusers.User_ID = user.User_ID 
+                                        LEFT JOIN intern ON intern.User_ID = user.User_ID
+                                        WHERE user.User_Type = 'intern'
+                                        GROUP BY project.Project_ID
+                                        ";
+
                                 $result = $conn->query($sql);
                                 ?>
+
                                 <table id="blog-list" class="table dt-table-hover" style="width:100%">
                                     <thead>
                                         <tr>
@@ -135,19 +138,49 @@ if (isset($_GET['delete'])) {
                                             <th class="">ประเภท</th>
                                             <th class="">ปีที่ฝึกงาน</th>
                                             <th class="">ผู้จัดทำ</th>
+                                            <th class="">เพิ่มโดย</th>
                                             <th class="no-content text-center">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <?php
-                                            if ($result->num_rows > 0) {
-                                                while ($row = $result->fetch_assoc()) { ?>
-                                                    <td><?= $row['Project_ID'] ?></td>
+                                        <?php
+                                        if ($result->num_rows > 0) {
+                                            while ($row = $result->fetch_assoc()) {
+                                                // Split the concatenated strings into arrays
+                                                $userImages = explode(',', $row['User_Images']);
+                                                $userIDs = explode(',', $row['User_IDs']);
+                                                $coverPaths = explode(',', $row['Cover_Paths']);
+                                                $slideshowPaths = explode(',', $row['Slideshow_Paths']);
+                                                $internStartDates = explode(',', $row['Intern_StartDates']);
+                                                $years = array(); // Array to store the years
+
+                                                foreach ($internStartDates as $startDate) {
+                                                    if (!empty($startDate)) {
+                                                        $year = date('Y', strtotime($startDate));
+                                                        if (!in_array($year, $years)) {
+                                                            $years[] = $year + 543;
+                                                        }
+                                                    }
+                                                }
+
+                                                $displayYear = !empty($years) ? $years[0] : '';
+                                        ?>
+                                                <tr data-id="<?= $row['Project_ID'] ?>">
                                                     <td>
-                                                        <a href="app-blog-detail.php" class="d-flex justify-content-left align-items-center">
+                                                        <div class="form-check form-check-success d-block new-control">
+                                                            <input class="form-check-input child-chk" type="checkbox">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <a href="app-blog-detail.php?Project_ID=<?= $row['Project_ID'] ?>" class="d-flex justify-content-left align-items-center">
                                                             <div class="avatar me-3">
-                                                                <img src="<?= $row['Cover_Path'] ?>" alt="Avatar" width="64" height="64">
+                                                                <?php
+                                                                if (!empty($coverPaths[0])) {
+                                                                    echo '<img src="' . $coverPaths[0] . '" alt="Project Cover" width="64" height="64">';
+                                                                } else {
+                                                                    echo '<img src="../src/assets/img/default-cover.jpg" alt="Project Cover" width="64" height="64">';
+                                                                }
+                                                                ?>
                                                             </div>
                                                             <div class="d-flex flex-column">
                                                                 <span class="text-truncate fw-bold"><?= $row['Project_Title'] ?></span>
@@ -155,39 +188,43 @@ if (isset($_GET['delete'])) {
                                                         </a>
                                                     </td>
                                                     <td><span class="badge badge-success"><?= $row['Category_Name'] ?></span></td>
-                                                    <td><?= $row['Intern_StartDate'] ?></td>
+                                                    <td><?= $displayYear ?></td>
                                                     <td>
                                                         <div class="d-flex justify-content-start align-items-center">
                                                             <?php
-                                                            if (!empty($row['User_Image'])) {
-                                                                $userImagePath = $row['User_Image'];
-                                                                echo '<img src="' . $userImagePath . '" class="rounded-circle profile-img-list" alt="avatar" width="40" height="40">';
-                                                            } else {
-                                                                echo '<img src="../src/assets/img/profile-9.jpeg" class="rounded-circle profile-img-list" alt="avatar" width="40" height="40">';
+                                                            foreach ($userImages as $image) {
+                                                                if (!empty($image)) {
+                                                                    echo '<img src="' . $image . '" class="rounded-circle profile-img-list" alt="avatar" width="40" height="40">';
+                                                                } else {
+                                                                    echo '<img src="../src/assets/img/profile-9.jpeg" class="rounded-circle profile-img-list" alt="avatar" width="40" height="40">';
+                                                                }
                                                             }
                                                             ?>
                                                         </div>
                                                     </td>
+                                                    <td><span class="badge badge-success"><?= $row['Project_CreateBy'] ?></span></td>
                                                     <td class="text-center">
                                                         <div class="d-flex justify-content-center align-items-center">
                                                             <a href="app-blog-edit.php?Project_ID=<?= $row['Project_ID'] ?>" class="bs-tooltip me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="แก้ไข" data-original-title="Edit">
                                                                 <iconify-icon icon="fluent:edit-20-regular" width="24" height="24" class="me-1"></iconify-icon>
                                                             </a>
-                                                            <a data-id="<?= $row["Project_ID"]; ?>" href="?delete=<?= $row["Project_ID"]; ?>" class="bs-tooltip delete-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="ลบ" data-original-title="Delete">
+                                                            <a href="#" data-id="<?= $row['Project_ID']; ?>" class="bs-tooltip delete-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="ลบ" data-original-title="Delete">
                                                                 <iconify-icon icon="fluent:delete-16-regular" width="24" height="24" class="me-1"></iconify-icon>
                                                             </a>
                                                         </div>
                                                     </td>
-                                        </tr>
-                                <?php
-                                                }
-                                            } else {
-                                                echo "<tr><td colspan='7'>No records found</td></tr>";
+                                                </tr>
+
+                                        <?php
                                             }
-                                            $conn->close();
-                                ?>
+                                        } else {
+                                            echo "<tr><td colspan='7'>No records found</td></tr>";
+                                        }
+                                        $conn->close();
+                                        ?>
                                     </tbody>
                                 </table>
+
                             </div>
                         </div>
 
@@ -221,89 +258,202 @@ if (isset($_GET['delete'])) {
     <script src="../src/plugins/src/sweetalerts2/sweetalert2@11.js"></script>
 
     <script>
-        blogList = $('#blog-list').DataTable({
-            headerCallback: function(e, a, t, n, s) {
-                e.getElementsByTagName("th")[0].innerHTML = `
-                <div class="form-check form-check-success d-block new-control">
-                    <input class="form-check-input chk-parent" type="checkbox" id="form-check-default">
-                </div>`
-            },
-            columnDefs: [{
-                targets: 0,
-                width: "30px",
-                className: "",
-                orderable: !1,
-                render: function(e, a, t, n) {
-                    return `
+        $(document).ready(function() {
+            blogList = $('#blog-list').DataTable({
+                headerCallback: function(e, a, t, n, s) {
+                    e.getElementsByTagName("th")[0].innerHTML = `
                     <div class="form-check form-check-success d-block new-control">
-                        <input class="form-check-input child-chk" type="checkbox" id="form-check-default">
-                    </div>`
-                }
-            }],
-            "dom": "<'dt--top-section'<'row'<'col-12 col-sm-6 d-flex justify-content-sm-start justify-content-center'l><'col-12 col-sm-6 d-flex justify-content-sm-end justify-content-center mt-sm-0 mt-3'f>>>" +
-                "<'table-responsive'tr>" +
-                "<'dt--bottom-section d-sm-flex justify-content-sm-between text-center'<'dt--pages-count  mb-sm-0 mb-3'i><'dt--pagination'p>>",
-            "oLanguage": {
-                "oPaginate": {
-                    "sPrevious": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>',
-                    "sNext": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>'
+                        <input class="form-check-input chk-parent" type="checkbox" id="form-check-default">
+                    </div>`;
                 },
-                "sInfo": "หน้าที่ _PAGE_ / _PAGES_",
-                "sSearch": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
-                "sSearchPlaceholder": "ค้นหา....",
-                "sLengthMenu": "จำนวนที่แสดง :  _MENU_",
-            },
-            "stripeClasses": [],
-            "lengthMenu": [5, 10, 20, 50],
-            "pageLength": 10
+                columnDefs: [{
+                    targets: 0,
+                    width: "30px",
+                    className: "",
+                    orderable: !1,
+                    render: function(e, a, t, n) {
+                        return `
+                        <div class="form-check form-check-success d-block new-control">
+                            <input class="form-check-input child-chk" type="checkbox" id="form-check-default">
+                        </div>`;
+                    }
+                }],
+                "dom": "<'dt--top-section'<'row'<'col-12 col-sm-6 d-flex justify-content-sm-start justify-content-center'l><'col-12 col-sm-6 d-flex justify-content-sm-end justify-content-center mt-sm-0 mt-3'<'btn-delete-container'>f>>>" +
+                    "<'table-responsive'tr>" +
+                    "<'dt--bottom-section d-sm-flex justify-content-sm-between text-center'<'dt--pages-count mb-sm-0 mb-3'i><'dt--pagination'p>>",
+                "oLanguage": {
+                    "oPaginate": {
+                        "sPrevious": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>',
+                        "sNext": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>'
+                    },
+                    "sInfo": "หน้าที่ _PAGE_ / _PAGES_",
+                    "sSearch": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+                    "sSearchPlaceholder": "ค้นหา....",
+                    "sLengthMenu": "จำนวนที่แสดง :  _MENU_",
+                },
+                "stripeClasses": [],
+                "lengthMenu": [5, 10, 20, 50],
+                "pageLength": 10
+            });
+
+            // เพิ่มปุ่มลบใน container
+            $("div.btn-delete-container").html(`
+            <button id="delete-selected-btn" class="btn btn-danger mx-2">
+                ลบข้อมูล
+            </button>
+        `);
+
+            multiCheck(blogList);
+
+            // ซ่อนปุ่มลบเมื่อเริ่มต้น
+            $('#delete-selected-btn').hide(); // ซ่อนปุ่มลบ
+
+            // ตรวจสอบการเลือก checkbox ที่ header (Select/Deselect All)
+            $('#blog-list').on('change', '.chk-parent', function() {
+                var isChecked = $(this).prop('checked');
+                $('.child-chk').prop('checked', isChecked);
+
+                // แสดง/ซ่อนปุ่มลบตามจำนวน checkbox ที่เลือก
+                if ($('.child-chk:checked').length > 0) {
+                    $('#delete-selected-btn').show();
+                } else {
+                    $('#delete-selected-btn').hide();
+                }
+            });
+
+            // ตรวจสอบการเลือก checkbox ในแถว
+            $('#blog-list').on('change', '.child-chk', function() {
+                // เช็คว่า checkbox ใดถูกเลือก
+                if ($('.child-chk:checked').length > 0) {
+                    $('#delete-selected-btn').show();
+                } else {
+                    $('#delete-selected-btn').hide();
+                }
+            });
+
+            // เมื่อคลิกปุ่มลบหลายรายการ
+            $('#delete-selected-btn').on('click', function() {
+                var selectedIds = [];
+                $('.child-chk:checked').each(function() {
+                    selectedIds.push($(this).closest('tr').data('id')); // ดึง id จากแต่ละแถวที่เลือก
+                });
+
+                if (selectedIds.length === 0) {
+                    Swal.fire({
+                        title: 'กรุณาเลือกข้อมูล',
+                        text: 'คุณยังไม่ได้เลือกข้อมูลที่จะลบ',
+                        icon: 'warning',
+                        showConfirmButton: false, // Hide the confirm button
+                        timer: 2000
+                    });
+                    return;
+                }
+
+                console.log("Select ID For Delete : ", selectedIds);
+
+                deleteMultiple(selectedIds); // ฟังก์ชันสำหรับการลบหลายๆ รายการ
+            });
+
+            // ฟังก์ชันลบหลายๆ รายการ
+            function deleteMultiple(ids) {
+                Swal.fire({
+                    title: 'แน่ใจใช่มั้ย ?',
+                    text: "หากลบ จะไม่สามารถกู้ข้อมูลกลับมาได้อีก!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#4CBB17',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'ตกลง',
+                    cancelButtonText: 'ยกเลิก',
+                    showLoaderOnConfirm: true,
+                    preConfirm: function() {
+                        return new Promise(function(resolve) {
+                            $.ajax({
+                                    url: 'ajax/delete_project.php',
+                                    type: 'POST',
+                                    data: {
+                                        deleteMultiple: true,
+                                        ids: ids
+                                    },
+                                })
+                                .done(function(response) {
+                                    const data = JSON.parse(response); // Ensure the response is parsed as JSON
+                                    if (data.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'ลบสำเร็จ',
+                                            text: 'ลบข้อมูลโปรเจคสำเร็จ',
+                                            showConfirmButton: true,
+                                        }).then(() => {
+                                            document.location.href = 'app-blog-list.php'; // ไปที่หน้าโปรเจคหลังจากลบสำเร็จ
+                                        });
+                                    } else {
+                                        Swal.fire('ผิดพลาด', data.message, 'error');
+                                    }
+                                })
+                                .fail(function() {
+                                    Swal.fire('ผิดพลาด', 'โปรดลองอีกครั้ง', 'error');
+                                });
+                        });
+                    },
+                });
+            }
         });
-        multiCheck(blogList);
     </script>
+
     <!-- END PAGE LEVEL SCRIPTS -->
 </body>
 
 </html>
 
 <script>
-    $(".delete-btn").click(function (e) {
-        var project_id = $(this).data('id');
-        e.preventDefault();
-        deleteConfirm(project_id);
-    })
+    $(document).ready(function() {
+        // เมื่อคลิกลิงก์ลบในแต่ละแถว (ถังขยะ)
+        $('.delete-btn').on('click', function(e) {
+            e.preventDefault(); // ป้องกันไม่ให้ลิงก์ทำงาน
 
-    function deleteConfirm(project_id) {
-        Swal.fire({
-            title: 'แน่ใจใช่มั้ย ?',
-            text: "หากลบ จะไม่สามารถกู้ข้อมูลกลับมาได้อีก!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#4CBB17',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'ตกลง',
-            cancelButtonText: 'ยกเลิก',
-            showLoaderOnConfirm: true,
-            preConfirm: function () {
-                return new Promise(function (resolve) {
-                    $.ajax({
-                        url: 'app-blog-list.php',
-                        type: 'GET',
-                        data: 'delete=' + project_id,
-                    })
-                        .done(function () {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'ลบสำเร็จ',
-                                text: 'สำเร็จ',
-                            }).then(() => {
-                                document.location.href = 'app-blog-list.php';
+            var projectId = $(this).data('id'); // ดึง ID ของโปรเจคที่ต้องการลบ
+
+            Swal.fire({
+                title: 'แน่ใจใช่มั้ย ?',
+                text: "หากลบ จะไม่สามารถกู้ข้อมูลกลับมาได้อีก!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#4CBB17',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'ตกลง',
+                cancelButtonText: 'ยกเลิก',
+                showLoaderOnConfirm: true,
+                preConfirm: function() {
+                    return new Promise(function(resolve) {
+                        $.ajax({
+                                url: 'ajax/delete_project.php',
+                                type: 'GET', // ใช้ GET เพราะเป็นการลบโปรเจค 1 รายการ
+                                data: {
+                                    delete: projectId
+                                },
                             })
-                        })
-                        .fail(function () {
-                            Swal.fire('ผิดพลาด', 'โปรดลองอีกครั้ง', 'error')
-                            window.location.reload();
-                        });
-                });
-            },
+                            .done(function(response) {
+                                const data = JSON.parse(response); // Ensure the response is parsed as JSON
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'ลบสำเร็จ',
+                                        text: 'ลบข้อมูลโปรเจคสำเร็จ',
+                                        showConfirmButton: true,
+                                    }).then(() => {
+                                        document.location.href = 'app-blog-list.php'; // ไปที่หน้าโปรเจคหลังจากลบสำเร็จ
+                                    });
+                                } else {
+                                    Swal.fire('ผิดพลาด', data.message, 'error');
+                                }
+                            })
+                            .fail(function() {
+                                Swal.fire('ผิดพลาด', 'โปรดลองอีกครั้ง', 'error');
+                            });
+                    });
+                },
+            });
         });
-    }
+    });
 </script>

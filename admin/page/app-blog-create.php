@@ -68,7 +68,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['project_time'] = time();
 
         // Check if required fields are empty
-        if ($project_title == '' && $project_detail == '' && $project_owner == '') {
+        if ($cover_image == '' && $project_slideshow == '') {
+            echo "<script>
+            setTimeout(() => {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ระวัง!!',
+                    text: 'กรุณาอัปโหลดรูป!!',
+                    confirmButtonText: 'ตกลง'
+                    });
+            }, 100);
+          </script>";
+        } else if ($project_title == '' && $project_detail == '' && $project_owner == '' && $category == '' && $subcategory == '') {
             echo "<script>
                     setTimeout(() => {
                         Swal.fire({
@@ -76,9 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             title: 'ระวัง!!',
                             text: 'กรุณากรอกข้อมูลให้ครบทุกช่อง',
                             confirmButtonText: 'ตกลง'
-                            }).then(() => {
-                            window.location.href = 'app-blog-create.php'; // Redirect if needed
-                        });
+                            });
                     }, 100);
                   </script>";
         } else {
@@ -227,7 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 data-allow-reorder="true"
                                                 data-max-file-size="5MB"
                                                 data-max-files="1">
-                                            <input type="text" id="cover_image" name="cover_image" class="form-control mt-2" readonly placeholder="Path ของไฟล์จะปรากฏที่นี่" value="<?= $cover_image ?>">
+                                            <input type="hidden" id="cover_image" name="cover_image" class="form-control mt-2" readonly placeholder="Path ของไฟล์จะปรากฏที่นี่" value="<?= $cover_image ?>">
 
                                         </div>
                                     </div>
@@ -261,7 +270,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="row mb-4">
                                         <div class="col-sm-12">
                                             <label class="title-form">เจ้าของโปรเจค</label>
-                                            <input name='project_owner' value='' placeholder="กรุณาเลือกเจ้าของโปรเจค">
+                                            <input name="project_owner" placeholder="กรุณาเลือกเจ้าของโปรเจค" value='<?php echo isset($_SESSION['project_owner']) ? json_encode($_SESSION['project_owner']) : ''; ?>'>>
+                                            <?php
+                                            var_dump($_SESSION['project_owner']);
+                                            ?>
                                         </div>
                                     </div>
                                 </div>
@@ -277,7 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <span style="color: #FF8484FF;">รองรับเฉพาะไฟล์ PNG , JPG เท่านั้น และไม่เกิน 5 MB ต่อไฟล์</span>
                                         </div>
                                     </div>
-                                    <input type="hidden" id="slideshow_image" name="slideshow_image">
+                                    <input type="hidden" id="slideshow_image" name="slideshow_image" class="form-control mt-2" readonly>
                                 </div>
                             </div>
 
@@ -287,14 +299,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="row">
                                         <div class="col-xxl-12 col-md-12 mb-4">
                                             <label for="category">หมวดหมู่</label>
-                                            <input id="category" name="category" placeholder="เลือกหมวดหมู่...">
-                                            <input type="hidden" name="category_id" id="category_id">
+                                            <input id="category" name="category" placeholder="เลือกหมวดหมู่..." value="<?php $category ?>">
+                                            <input type="text" class="form-control mt-2" name="category_id" id="category_id" value="">
                                         </div>
 
                                         <div class="col-xxl-12 col-md-12 mb-4">
                                             <label for="tags title-form">หมวดหมู่ย่อย</label>
-                                            <input id="subcategory" class="blog-tags" value="" name="subcategory" placeholder="เลือกหมวดหมู่ย่อย...">
-                                            <input type="hidden" name="subcategory_id" id="subcategory_id">
+                                            <input id="subcategory" class="blog-tags" value="" name="subcategory" placeholder="เลือกหมวดหมู่ย่อย..." value="<?php $subcategory ?>">
+                                            <input type="text" class="form-control mt-2" name="subcategory_id" id="subcategory_id">
                                         </div>
                                         <div class="col-xxl-12 col-md-12 mb-4">
                                             <button type="submit" name="Preview" value="Preview" class="btn btn-secondary w-100">Preview</button>
@@ -343,6 +355,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="../src/plugins/src/filepond/FilePondPluginImageResize.min.js"></script>
     <script src="../src/plugins/src/filepond/FilePondPluginImageTransform.min.js"></script>
     <script src="../src/plugins/src/filepond/filepondPluginFileValidateSize.min.js"></script>
+    <script src="../src/plugins/src/filepond/FilePondPluginImageValidateSize.js"></script>
     <script src="https://unpkg.com/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.js"></script>
 
 
@@ -357,7 +370,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- FilePond For Upload Cover -->
 
     <script>
-        FilePond.registerPlugin(FilePondPluginFileValidateType, FilePondPluginFileValidateSize, FilePondPluginImagePreview, FilePondPluginFilePoster);
+        FilePond.registerPlugin(FilePondPluginFileValidateType, FilePondPluginFileValidateSize, FilePondPluginImageValidateSize, FilePondPluginImagePreview, FilePondPluginFilePoster);
 
         const filePathFromDB = '<?= $cover_image ?>'; // ตัวอย่าง: ../../../assets/images/project/cover/filename.webp
 
@@ -372,6 +385,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             maxFileSize: '5MB',
             maxFiles: 1,
             allowMultiple: false,
+            // imageValidateSizeMinWidth: 500,
+            // imageValidateSizeMinHeight: 700,
             server: {
                 process: 'ajax/cover_upload.php',
             },
@@ -699,27 +714,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                // เพิ่มไฟล์ที่มีอยู่แล้วใน Dropzone
+                // ตรวจสอบว่ามีข้อมูล project_slideshow หรือไม่
                 if ('<?php echo $project_slideshow; ?>' !== '') {
                     var existingFiles = '<?php echo $project_slideshow; ?>'.split(',');
+
+                    // นำ path ไฟล์มาทำความสะอาด และสร้าง mockFile
                     existingFiles.forEach(function(filePath) {
-                        // ตัด ../ ออกจาก path
                         var cleanedFilePath = filePath.replace(/^(\.\.\/){1}/, '');
 
-                        // สร้าง mockFile สำหรับไฟล์ที่มีอยู่แล้ว
+                        // สร้าง mockFile
                         var mockFile = {
                             name: cleanedFilePath,
                             serverFilePath: cleanedFilePath,
-                            url: cleanedFilePath // URL ของไฟล์ที่อยู่บนเซิร์ฟเวอร์
+                            url: cleanedFilePath
                         };
 
-                        // ใช้ displayExistingFile เพื่อแสดงไฟล์ที่มีอยู่แล้ว
+                        // แสดงใน Dropzone
                         myDropzone.displayExistingFile(mockFile, cleanedFilePath);
-
-                        // ระบุว่าไฟล์ถูกอัปโหลดเสร็จแล้ว
                         myDropzone.emit("complete", mockFile);
                     });
+
+                    // แสดงค่าใน input[name='slideshow_image']
+                    document.querySelector("input[name='slideshow_image']").value = existingFiles.join(',');
                 }
+
 
                 // เมื่อคิวอัปโหลดเสร็จสิ้น
                 this.on("queuecomplete", function() {
@@ -735,40 +753,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Fetch Owner Project -->
     <script>
         var inputElm = document.querySelector('input[name=project_owner]');
+        var preSelectedOwner = inputElm.value; // Get the value (if any)
+        console.log(preSelectedOwner); // ตรวจสอบค่าของ preSelectedOwner
+
+        // แปลง preSelectedOwner จาก JSON string ให้เป็น object
+        var preSelectedOwnerObj = preSelectedOwner ? JSON.parse(preSelectedOwner) : null;
+        console.log(preSelectedOwnerObj); // ตรวจสอบค่าหลังจากแปลงเป็น object
 
         function tagTemplate(tagData) {
             return `
-        <tag title="${tagData.User_ID}"
-                contenteditable='false'
-                spellcheck='false'
-                tabIndex="-1"
-                class="tagify__tag ${tagData.class ? tagData.class : ""}"
-                ${this.getAttributes(tagData)}>
-            <x title='' class='tagify__tag__removeBtn' role='button' aria-label='remove tag'></x>
-            <div>
-                <div class='tagify__tag__avatar-wrap'>
-                    <img onerror="this.style.visibility='hidden'" src="${tagData.User_Image}">
-                </div>
-                <span class='tagify__tag-text'>${tagData.User_FirstName} ${tagData.User_Lastname}</span>
+    <tag title="${tagData.User_ID}"
+            contenteditable='false'
+            spellcheck='false'
+            tabIndex="-1"
+            class="tagify__tag ${tagData.class ? tagData.class : ""}"
+            ${this.getAttributes(tagData)}>
+        <x title='' class='tagify__tag__removeBtn' role='button' aria-label='remove tag'></x>
+        <div>
+            <div class='tagify__tag__avatar-wrap'>
+                <img onerror="this.style.visibility='hidden'" src="${tagData.User_Image}">
             </div>
-        </tag>
-    `;
+            <span class='tagify__tag-text'>${tagData.User_FirstName} ${tagData.User_Lastname}</span>
+        </div>
+    </tag>
+`;
         }
 
         function suggestionItemTemplate(tagData) {
             return `
-        <div ${this.getAttributes(tagData)}
-            class='tagify__dropdown__item ${tagData.class ? tagData.class : ""}'
-            tabindex="0"
-            role="option">
-            ${tagData.User_Image ? `
-            <div class='tagify__dropdown__item__avatar-wrap'>
-                <img onerror="this.style.visibility='hidden'" src="${tagData.User_Image}">
-            </div>` : ''}
-            <strong>${tagData.User_FirstName} ${tagData.User_Lastname}</strong>
-            <span>${tagData.Position_Name}</span>
-        </div>
-    `;
+    <div ${this.getAttributes(tagData)}
+        class='tagify__dropdown__item ${tagData.class ? tagData.class : ""}'
+        tabindex="0"
+        role="option">
+        ${tagData.User_Image ? `
+        <div class='tagify__dropdown__item__avatar-wrap'>
+            <img onerror="this.style.visibility='hidden'" src="${tagData.User_Image}">
+        </div>` : ''}
+        <strong>${tagData.User_FirstName} ${tagData.User_Lastname}</strong>
+        <span>${tagData.Position_Name}</span>
+    </div>
+`;
         }
 
         // ดึงข้อมูลจาก API
@@ -800,7 +824,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             var usrList = new Tagify(inputElm, {
-                tagTextProp: 'User_FirstName', // ใช้ฟิลด์ที่ต้องการแสดงผล
+                tagTextProp: 'User_FirstName',
                 enforceWhitelist: true,
                 skipInvalid: true,
                 dropdown: {
@@ -814,6 +838,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     dropdownItem: suggestionItemTemplate
                 },
                 whitelist: userList // ใช้ข้อมูลจาก API
+            });
+
+            console.log(preSelectedOwnerObj);
+            console.log(userList)
+
+
+            // Pre-select the owner if a value is provided in the input field
+            preSelectedOwnerObj.forEach(owner => {
+                const preSelectedUser = userList.find(user => user.User_ID == owner.User_ID);
+                if (preSelectedUser) {
+                    usrList.addTags([preSelectedUser]); // เพิ่ม tag
+                }
             });
 
             usrList.on('dropdown:show dropdown:updated', onDropdownShow);
@@ -1021,13 +1057,16 @@ session_start();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['Insert_Project'])) {
 
+        
         // var_dump($_POST);
-
+        var_dump($_SESSION);
+        
         // รับค่าที่ส่งมาจากฟอร์ม
         $project_title = $_POST['project_title'];
         $project_detail = $_POST['project_detail'];
         $project_owner = $_POST['project_owner'];
         $cover_image_path = $_POST['cover_image'];
+        $CreateBy_UserID = $_SESSION['User_ID'];
 
         // Remove the first occurrence of '../'
         $cover_image_path = preg_replace('/^(\.\.\/)/', '', $cover_image_path, 1);
@@ -1045,17 +1084,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Join the paths back into a single string
         $slideshow_image_path = implode(',', $image_paths);
 
-        var_dump($cover_image_path);
+        // var_dump($cover_image_path);
 
-        // แปลงค่า JSON เป็น array
+        // แปลง JSON เป็น array
         $owner_data = json_decode($project_owner, true);
 
-        // ดึงค่า User_ID ออกมา
-        if (is_array($owner_data) && isset($owner_data[0]['User_ID'])) {
-            $project_owner = $owner_data[0]['User_ID'];
-            // echo "User_ID: " . $user_id;
+        if (is_array($owner_data)) {
+            echo "User_ID ทั้งหมด:\n";
+            $user_ids = []; // สร้าง array เก็บ User_ID ทั้งหมด
+
+            // วนลูปดึงค่า User_ID
+            foreach ($owner_data as $owner) {
+                if (isset($owner['User_ID'])) {
+                    $user_ids[] = $owner['User_ID']; // เก็บ User_ID ไว้ใน array
+                }
+            }
+
+            // แสดงผลโดยคั่นด้วยเครื่องหมาย ,
+            echo implode(", ", $user_ids);
         } else {
-            echo "ไม่พบข้อมูล User_ID";
+            echo "ไม่สามารถแปลง JSON หรือไม่พบข้อมูล";
         }
 
         // ตรวจสอบค่าที่ได้รับจากฟอร์ม
@@ -1087,23 +1135,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit; // หยุดการทำงานหากข้อมูลไม่ครบ
         }
 
-        // เตรียมคำสั่ง SQL สำหรับการ insert ข้อมูลโปรเจ็ค
-        $sql = "INSERT INTO project (Project_Title, Project_Detail, Project_UserID) VALUES (?, ?, ?)";
+        // เตรียมคำสั่ง SQL สำหรับการ INSERT ข้อมูลโปรเจ็ค
+        $sql = "INSERT INTO project (Project_Title, Project_Detail, Project_CreateBy) VALUES (?, ?, ?)";
 
         if ($stmt = $conn->prepare($sql)) {
-            $stmt->bind_param("sss", $project_title, $project_detail, $project_owner);
+            $stmt->bind_param("sss", $project_title, $project_detail, $CreateBy_UserID);
 
             if ($stmt->execute()) {
-                $project_id = $stmt->insert_id;  // รับ Project_ID ที่เพิ่งเพิ่มเข้าไป
+                $project_id = $stmt->insert_id; // รับ Project_ID ที่เพิ่งเพิ่มเข้าไป
 
-                // ถ้ามีการอัปโหลดไฟล์สำหรับ cover_image
-                if (!empty($cover_image_path) && !empty($slideshow_image_path)) {
-                    $sql_image = "INSERT INTO projectimages (Project_ID, Cover_Path, Slideshow_Path) VALUES (?, ?, ?)";
-                    $stmt_image = $conn->prepare($sql_image);
-                    $stmt_image->bind_param("iss", $project_id, $cover_image_path, $slideshow_image_path);
-                    $stmt_image->execute();
-                    $stmt_image->close();
+                // INSERT ข้อมูลรูปภาพ
+                $sql_image = "INSERT INTO projectimages (Project_ID, Cover_Path, Slideshow_Path) VALUES (?, ?, ?)";
+                $stmt_image = $conn->prepare($sql_image);
+                $stmt_image->bind_param("iss", $project_id, $cover_image_path, $slideshow_image_path);
+                $stmt_image->execute();
+                $stmt_image->close();
+
+                // วนลูป INSERT ข้อมูล User_ID ลงใน projectusers
+                $sql_user = "INSERT INTO projectusers (Project_ID, User_ID) VALUES (?, ?)";
+                $stmt_user = $conn->prepare($sql_user);
+
+                foreach ($user_ids as $user_id) {
+                    $stmt_user->bind_param("is", $project_id, $user_id);
+                    $stmt_user->execute();
                 }
+                $stmt_user->close();
+
+                // เคลียร์ session หลังจากบันทึกข้อมูลเสร็จ
+                session_start();
+                unset($_SESSION['cover_image']);
+                unset($_SESSION['project_title']);
+                unset($_SESSION['project_detail']);
+                unset($_SESSION['project_owner']);
+                unset($_SESSION['slideshow_image']);
 
                 // แจ้งเตือนด้วย SweetAlert สำหรับการบันทึกสำเร็จ
                 echo "<script>

@@ -472,16 +472,16 @@ if (isset($_POST['Insert_User'])) {
     $formatted_birthday = sprintf('%04d-%02d-%02d', $year_ad, $month, $day);
     $user_email = $_POST['User_Email'] ?? '';
 
-    $result = $conn->query("SELECT MAX(User_ID) AS max_id FROM user WHERE User_ID LIKE 'Off_Efin%'");
-    $new_id = 'Off_Efin001';
+    $result = $conn->query("SELECT MAX(User_ID) AS max_id FROM user WHERE User_ID LIKE 'Intern_Efin%'");
+    $new_id = 'Intern_Efin001';
     if ($result && $row = $result->fetch_assoc()) {
         if ($row['max_id']) {
             $last_id_number = (int)substr($row['max_id'], 8);
-            $new_id = 'Off_Efin' . str_pad($last_id_number + 1, 3, '0', STR_PAD_LEFT);
+            $new_id = 'Intern_Efin' . str_pad($last_id_number + 1, 3, '0', STR_PAD_LEFT);
         }
     }
 
-    $user_type = 'officer';
+    $user_type = 'intern';
 
     $stmt = $conn->prepare("
         INSERT INTO `user` (
