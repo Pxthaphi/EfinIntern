@@ -4,15 +4,15 @@ include "../../db/connection.php";
 // ini_set('display_errors', 1);
 
 // ดึงข้อมูลจาก URL (ถ้ามี)
-$_SESSION['last_project'] = '';
-
-
 $project_id = $_GET['Project_ID'] ?? 0; // รับ ID โครงการจาก URL
+
+var_dump($project_id);
+
 
 // ตรวจสอบว่าได้รับค่า project_id มาจาก URL หรือไม่
 if ($project_id != 0) {
     // ตรวจสอบว่ามีการดึงข้อมูลไปแล้วหรือยังใน Session
-    if (empty($_SESSION['last_project']) && $_SESSION['last_project'] != $project_id) {
+    if ($project_id) {
         // คำสั่ง SQL สำหรับดึงข้อมูลโปรเจคที่มี Project_ID ตรงกับที่ได้รับจาก URL
         $sql = "
             SELECT 
@@ -33,49 +33,42 @@ if ($project_id != 0) {
             JOIN 
                 projectcategory pc ON pc.Project_ID = p.Project_ID
             WHERE 
-                p.Project_ID = ?
+                p.Project_ID = $project_id
             GROUP BY 
                 p.Project_ID, 
                 p.Project_Title, 
                 p.Project_Detail
         ";
 
-        // Prepare statement
-        if ($stmt = $conn->prepare($sql)) {
-            // Bind the project ID parameter
-            $stmt->bind_param("i", $project_id);
+        // ดำเนินการคำสั่ง SQL
+        $result = $conn->query($sql);
 
-            // Execute the statement
-            $stmt->execute();
+        var_dump($result);
 
-            // Get the result
-            $result = $stmt->get_result();
-
-            // ตรวจสอบว่ามีข้อมูลหรือไม่
-            if ($result->num_rows > 0) {
-                // ดึงข้อมูลแต่ละแถว
-                while ($project = $result->fetch_assoc()) {
-                    $projectData = [
-                        'Project_ID' => $project['Project_ID'],
-                        'Project_Title' => $project['Project_Title'],
-                        'Project_Detail' => $project['Project_Detail'],
-                        'User_IDs' => explode(',', $project['User_IDs']),
-                        'Cover_Images' => explode(',', $project['Cover_Images']),
-                        'Slideshow_Images' => explode(',', $project['Slideshow_Images']),
-                        'Category_IDs' => explode(',', $project['Category_IDs']),
-                        'Subcategory_IDs' => explode(',', $project['Subcategory_IDs']),
-                    ];
-                }
-
-                // บันทึกข้อมูลใน Session
-                $_SESSION['last_project_id'] = $project_id; // Set the last_project_id
-            } else {
-                // echo "No project found with ID: $project_id";
+        // ตรวจสอบว่ามีข้อมูลหรือไม่
+        if ($result->num_rows > 0) {
+            // ดึงข้อมูลแต่ละแถว
+            while ($project = $result->fetch_assoc()) {
+                $projectData = [
+                    'Project_ID' => $project['Project_ID'],
+                    'Project_Title' => $project['Project_Title'],
+                    'Project_Detail' => $project['Project_Detail'],
+                    'User_IDs' => explode(',', $project['User_IDs']),
+                    'Cover_Images' => explode(',', $project['Cover_Images']),
+                    'Slideshow_Images' => explode(',', $project['Slideshow_Images']),
+                    'Category_IDs' => explode(',', $project['Category_IDs']),
+                    'Subcategory_IDs' => explode(',', $project['Subcategory_IDs']),
+                ];
             }
 
-            // Close the statement
-            $stmt->close();
+            // บันทึกข้อมูลใน Session
+            $_SESSION['last_project_id'] = $project_id;
+        } else {
+            echo "No project found with ID: $project_id";
         }
+    } else {
+        // ดึงข้อมูลจาก Session
+        $projectData = $_SESSION['project_data'];
     }
 
     // ใช้งานข้อมูลใน $projectData
@@ -87,7 +80,15 @@ if ($project_id != 0) {
     $slideshowImages = $projectData['Slideshow_Images'];
     $categoryIDs = $projectData['Category_IDs'];
     $subcategoryIDs = $projectData['Subcategory_IDs'];
+
+    var_dump($projectData);
+} else {
+    echo "No Project ID provided.";
 }
+
+// Define session expiration time (1 minutes = 60 seconds)
+$session_timeout = 5; // 5 นาที
+
 
 // Retrieve data from POST or SESSION, with fallback to empty string
 $project_title = $_POST['project_title'] ?? $_SESSION['project_title'] ?? '';
@@ -100,23 +101,22 @@ $category_id = $_POST['category_id'] ?? $_SESSION['category_id'] ?? '';
 $subcategory = $_POST['subcategory'] ?? $_SESSION['subcategory'] ?? '';
 $subcategory_id = $_POST['subcategory_id'] ?? $_SESSION['subcategory_id'] ?? '';
 
+
 // Check if the session data has been set and if it has expired
 if (isset($_SESSION['project_time'])) {
-    // Define session expiration time (1 minute = 60 seconds)
-    $session_timeout = 600; // 100 นาที
     $session_age = time() - $_SESSION['project_time'];
 
-    // If session data is older than the timeout, clean up session data and files
+    $cover_image_new = preg_replace('/^(\.\.\/){1}/', '', $cover_image);
+    $project_slideshow_new = preg_replace('/^(\.\.\/){1}/', '', $project_slideshow);
+
+    // If session data is older than 5 minutes, unset the session variables
     if ($session_age > $session_timeout) {
-        // Process cover image if it exists and delete it
+        // ลบไฟล์ cover_image หากมีอยู่ในโฟลเดอร์
         if (isset($_SESSION['cover_image']) && file_exists($_SESSION['cover_image'])) {
-            $cover_image_new = preg_replace('/^(\.\.\/){1}/', '', $_SESSION['cover_image']);
-            if (file_exists($cover_image_new)) {
-                unlink($cover_image_new);
-            }
+            unlink($cover_image_new);
         }
 
-        // Process slideshow images if they exist and delete them
+        // ลบไฟล์ slideshow_image ทีละไฟล์ หากมีหลายไฟล์
         if (isset($_SESSION['slideshow_image']) && is_array($_SESSION['slideshow_image'])) {
             foreach ($_SESSION['slideshow_image'] as $imagePath) {
                 $imagePath = preg_replace('/^(\.\.\/){1}/', '', $imagePath);
@@ -126,21 +126,20 @@ if (isset($_SESSION['project_time'])) {
             }
         }
 
-        // Clear session data
-        unset(
-            $_SESSION['cover_image'],
-            $_SESSION['project_title'],
-            $_SESSION['project_detail'],
-            $_SESSION['project_owner'],
-            $_SESSION['slideshow_image'],
-            $_SESSION['category'],
-            $_SESSION['category_id'],
-            $_SESSION['subcategory'],
-            $_SESSION['subcategory_id'],
-            $_SESSION['project_time']
-        );
+        // ล้างค่าเซสชัน
+        unset($_SESSION['cover_image']);
+        unset($_SESSION['project_title']);
+        unset($_SESSION['project_detail']);
+        unset($_SESSION['project_owner']);
+        unset($_SESSION['slideshow_image']);
+        unset($_SESSION['category']);
+        unset($_SESSION['category_id']);
+        unset($_SESSION['subcategory']);
+        unset($_SESSION['subcategory_id']);
+        unset($_SESSION['project_time']);
     }
 }
+
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -237,8 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // ตรวจสอบค่าของ Project_Cover จาก Session , Post , Database
 $CoverimageData = '';
 if (!empty($cover_image)) {
-    $cover_image_new = preg_replace('/^(\.\.\/){1}/', '', $cover_image);
-    $CoverimageData = $cover_image_new;
+    $CoverimageData = $cover_image; // from Session & POST
 } elseif (!empty($coverImages)) {
     $CoverimageData = $coverImages; // from Database
 }
@@ -268,11 +266,6 @@ if (!empty($project_title)) {
 $projectdetailData = '';
 if (!empty($project_detail)) {
     $projectdetailData = $project_detail; // from Session & POST
-    $project_detail = preg_replace(
-        '/(<img\s+[^>]*src=["\'])\.\.\//i',
-        '$1',
-        $project_detail
-    );
 } elseif (!empty($slideshowImages)) {
     $projectdetailData = $projectDetail; // from Database
 }
@@ -287,9 +280,6 @@ if (!empty($project_detail)) {
 $projectownerData = '';
 if (!empty($project_owner)) {
     $projectownerData = $project_owner; // from Session & POST
-
-    // var_dump($project_owner);
-
 } elseif (!empty($userIDs)) {
     // สมมติว่า $userIDs เป็นอาร์เรย์ที่มีค่าเช่น ['Intern_Efin001', 'Intern_Efin002']
     $user_details = []; // สร้างอาร์เรย์เพื่อเก็บข้อมูลผู้ใช้
@@ -340,9 +330,12 @@ if ($_SESSION['last_project_id'] == $project_id) {
 
 if (!empty($category_id)) {
     $categoryData = $category_id; // from Session & POST
+
+    print_r($categoryData);
 } elseif (!empty($categoryIDs)) {
     // ตรวจสอบว่า $categoryIDs เป็นอาร์เรย์หรือไม่
     if (is_array($categoryIDs)) {
+        var_dump("cateID : ", $categoryIDs);
         // ป้องกัน SQL Injection โดยการแปลงค่าในอาร์เรย์ให้เป็นจำนวนเต็ม
         $categoryIDsArray = array_map('intval', $categoryIDs); // แปลงแต่ละค่าของอาร์เรย์ให้เป็นตัวเลข
         $categoryIDsList = implode(',', $categoryIDsArray); // แปลงอาร์เรย์เป็นสตริงที่คั่นด้วย comma
@@ -375,8 +368,9 @@ $subcategoryData = '';
 $subcategoryData_ID = ''; // Initialize subcategory ID
 
 if (!empty($subcategory)) {
-    $subcategoryData = $subcategory_id; // From Session & POST
+    $subcategoryData = $subcategory; // From Session & POST
 } elseif (!empty($subcategoryIDs)) {
+    var_dump($subcategoryIDs);
     // Check if $subcategoryIDs is an array
     if (is_array($subcategoryIDs)) {
         // Prevent SQL Injection by converting the values in the array to integers
@@ -394,6 +388,11 @@ if (!empty($subcategory)) {
 
             // Loop through the query result
             while ($row = $result->fetch_assoc()) {
+                // Add subcategory details to the array
+                $subcategories[] = [
+                    "value" => $row["Subcategory_Name"],  // Use Subcategory_Name from the database
+                ];
+
                 // Store Subcategory_IDs in an array for $subcategoryData_ID
                 $subcategoryIDsList[] = $row["Subcategory_ID"];
             }
@@ -421,44 +420,16 @@ if (!empty($subcategory)) {
 
 // ตรวจสอบค่าของ Slideshow จาก Session , Post , Database
 $slideshowData = '';
-// Assuming $slideshowImages is an array
-if (!empty($slideshowImages) && is_array($slideshowImages)) {
-    // Join the array elements into a comma-separated string
-    $slideshowImages = implode(',', $slideshowImages);
-}
-
-// Now proceed as before
 if (!empty($project_slideshow)) {
-    // Split the string by commas to get individual paths
-    $paths = explode(',', $project_slideshow);
-
-    // Loop through each path and remove the first ../
-    $new_paths = array_map(function ($path) {
-        return preg_replace('/^(\.\.\/){0}/', '', $path, 1);
-    }, $paths);
-
-
-    // Join the paths back into a single string
-    $project_slideshow_new = implode(',', $new_paths);
-
-    $slideshowData = $project_slideshow_new; // from Session & POST
+    $slideshowData = $project_slideshow; // from Session & POST
 } elseif (!empty($slideshowImages)) {
-    // Split the string by commas to get individual paths
-    $paths = explode(',', $slideshowImages);
-
-    // Loop through each path and prepend ../../ to it
-    $new_paths = array_map(function ($path) {
-        return '../' . $path; // Prepend ../../ to each path
-    }, $paths);
-
-    // Join the paths back into a single string
-    $slideshowImages_new = implode(',', $new_paths);
-
-    $slideshowData = $slideshowImages_new; // from Database
+    $slideshowData = $slideshowImages; // from Database
 }
 
-
-
+// แปลงอาร์เรย์เป็นสตริงที่คั่นด้วย comma (หรือใช้คั่นด้วยอื่น ๆ ที่ต้องการ)
+if (is_array($slideshowData)) {
+    $slideshowData = implode(',', $slideshowData);
+}
 
 // // แสดงผลลัพธ์
 // echo $slideshowData;
@@ -467,8 +438,8 @@ if (!empty($project_slideshow)) {
 
 // --------------------- สิ้นสุดเปรียบเทียบค่าของตัวแปร ------------------------ //
 
-// var_dump($_POST);
-// var_dump($_SESSION);
+var_dump($_POST);
+var_dump($_SESSION);
 
 ?>
 
@@ -516,8 +487,9 @@ if (!empty($project_slideshow)) {
     <link rel="stylesheet" type="text/css" href="../src/plugins/css/dark/editors/quill/quill.snow.css">
     <link rel="stylesheet" type="text/css" href="../src/plugins/css/dark/tagify/custom-tagify.css">
     <link href="../src/plugins/css/dark/filepond/custom-filepond.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="../src/plugins/src/filepond/filepond-plugin-file-poster.css">
-
+    <link
+        href="https://unpkg.com/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.css"
+        rel="stylesheet" />
     <!-- END PAGE LEVEL PLUGINS/CUSTOM STYLES -->
 
     <!--  BEGIN CUSTOM STYLE FILE  -->
@@ -526,55 +498,6 @@ if (!empty($project_slideshow)) {
     <!--  END CUSTOM STYLE FILE  -->
 
     <link href="../src/plugins/src/dropzone/dropzone.min.css" rel="stylesheet" />
-
-    <style>
-        #countdown-container {
-            text-align: right;
-            /* ชิดขวา */
-        }
-
-        #countdown {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #ffffff;
-            background: linear-gradient(145deg, #40C50C, #36a10a);
-            padding: 8px 16px;
-            border-radius: 8px;
-            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
-            display: inline-block;
-            text-align: center;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        #countdown:hover {
-            transform: scale(1.03);
-        }
-
-        #countdown span {
-            font-size: 2rem;
-            color: #ffffff;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            margin: 0 6px;
-            transition: color 0.3s ease;
-        }
-
-        #countdown span:hover {
-            color: #ffcc00;
-        }
-
-        #countdown span.separator {
-            font-size: 1.8rem;
-            color: #f1f1f1;
-        }
-
-        .reset-info {
-            font-size: 0.6rem;
-            color: #FF4848FF;
-            margin-top: 5px;
-            font-style: italic;
-        }
-    </style>
 
 </head>
 
@@ -591,7 +514,6 @@ if (!empty($project_slideshow)) {
     <!--  END LOADER -->
 
     <!--  BEGIN NAVBAR  -->
-    <?php include 'partials/navbar.php' ?>
     <!--  END NAVBAR  -->
 
     <!--  BEGIN MAIN CONTAINER  -->
@@ -601,7 +523,6 @@ if (!empty($project_slideshow)) {
         <div class="search-overlay"></div>
 
         <!--  BEGIN SIDEBAR  -->
-        <?php include 'partials/sidebar.php' ?>
         <!--  END SIDEBAR  -->
 
         <!--  BEGIN CONTENT AREA  -->
@@ -621,27 +542,11 @@ if (!empty($project_slideshow)) {
                             </a>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-center">
-                            <!-- ชิดซ้าย -->
-                            <h2 class="title-form mb-0">แก้ไขข้อมูลโปรเจค</h2>
-
-                            <!-- ชิดขวา -->
-                            <?php if ($_SESSION['project_time']) { ?>
-                                <div id="countdown-container">
-                                    <div id="countdown">
-                                        <span>10</span><span class="separator">:</span>
-                                        <span>30</span><span class="separator">:</span>
-                                        <span>45</span>
-                                    </div>
-                                    <p class="reset-info">
-                                        **หากเวลานับถอยหลังหมด ข้อมูลจะถูกรีเซ็ตกลับไปเป็นข้อมูลเดิม**
-                                    </p>
-                                </div>
-                            <?php } ?>
-
+                        <div class="d-flex justify-content-start">
+                            <h2 class="title-form">แก้ไขข้อมูลโปรเจค</h2>
                         </div>
-                    </div>
 
+                    </div>
 
 
                     <!-- /BREADCRUMB -->
@@ -657,6 +562,7 @@ if (!empty($project_slideshow)) {
                                         </div>
 
                                         <input type="hidden" class="form-control mt-2" name="Project_ID" id="Project_ID" value="<?php echo htmlspecialchars($project_id); ?>">
+
 
                                         <div class="multiple-file-upload">
                                             <input type="file"
@@ -703,7 +609,7 @@ if (!empty($project_slideshow)) {
                                             <input
                                                 name="project_owner"
                                                 placeholder="กรุณาเลือกเจ้าของโปรเจค"
-                                                value='<?php echo isset($projectownerData) ? htmlspecialchars(json_encode($projectownerData), ENT_QUOTES, 'UTF-8') : '[]'; ?>'>
+                                                value='<?php echo isset($user_details) ? htmlspecialchars(json_encode($user_details), ENT_QUOTES, 'UTF-8') : '[]'; ?>'>
                                         </div>
                                     </div>
                                 </div>
@@ -730,19 +636,19 @@ if (!empty($project_slideshow)) {
                                         <div class="col-xxl-12 col-md-12 mb-4">
                                             <label for="category">หมวดหมู่</label>
                                             <input id="category" name="category" placeholder="เลือกหมวดหมู่...">
-                                            <input type="hidden" class="form-control mt-2" name="category_id" id="category_id" value="<?php echo htmlspecialchars($categoryData); ?>">
+                                            <input type="text" class="form-control mt-2" name="category_id" id="category_id" value="<?php echo htmlspecialchars($categoryData); ?>">
                                         </div>
 
                                         <div class="col-xxl-12 col-md-12 mb-4">
                                             <label for="tags title-form">หมวดหมู่ย่อย</label>
                                             <input id="subcategory" class="blog-tags" name="subcategory" placeholder="เลือกหมวดหมู่ย่อย...">
-                                            <input type="hidden" class="form-control mt-2" name="subcategory_id" id="subcategory_id" value="<?php echo htmlspecialchars($subcategoryData); ?>">
+                                            <input type="text" class="form-control mt-2" name="subcategory_id" id="subcategory_id" value="<?php echo htmlspecialchars($subcategoryData); ?>">
                                         </div>
                                         <div class="col-xxl-12 col-md-12 mb-4">
                                             <button type="submit" name="Preview" value="Preview" class="btn btn-secondary w-100">Preview</button>
                                         </div>
                                         <div class="col-xxl-12 col-md-12 mb-4">
-                                            <button type="submit" class="btn btn-success w-100" name="Update_Project">บันทึกข้อมูล</button>
+                                            <button type="submit" class="btn btn-success w-100" name="Insert_Project">บันทึกข้อมูล</button>
                                         </div>
 
                                     </div>
@@ -786,8 +692,7 @@ if (!empty($project_slideshow)) {
     <script src="../src/plugins/src/filepond/FilePondPluginImageTransform.min.js"></script>
     <script src="../src/plugins/src/filepond/filepondPluginFileValidateSize.min.js"></script>
     <script src="../src/plugins/src/filepond/FilePondPluginImageValidateSize.js"></script>
-    <script src="../src/plugins/src/filepond/filepond-plugin-file-poster.js"></script>
-    <script src="../src/plugins/src/filepond/filepond-plugin-file-rename.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.js"></script>
 
 
     <script src="../src/plugins/src/tagify/tagify.min.js"></script>
@@ -801,12 +706,12 @@ if (!empty($project_slideshow)) {
     <!-- FilePond For Upload Cover -->
 
     <script>
-        FilePond.registerPlugin(FilePondPluginFileValidateType, FilePondPluginFileValidateSize, FilePondPluginImageValidateSize, FilePondPluginImagePreview, FilePondPluginFilePoster, FilePondPluginFileRename);
+        FilePond.registerPlugin(FilePondPluginFileValidateType, FilePondPluginFileValidateSize, FilePondPluginImageValidateSize, FilePondPluginImagePreview, FilePondPluginFilePoster);
 
         const filePathFromDB = '<?= $CoverimageData ?>'; // ตัวอย่าง: ../../../assets/images/project/cover/filename.webp
 
         // ตัด ../ ตัวแรกออก
-        const cleanedPath = filePathFromDB.replace(/^(\.\.\/){1}/, '');
+        const cleanedPath = filePathFromDB.replace(/^(\.\.\/){0}/, '');
 
         console.log(cleanedPath);
 
@@ -870,12 +775,6 @@ if (!empty($project_slideshow)) {
                 } else {
                     console.error('Error processing file:', error);
                 }
-            },
-        });
-        FilePond.setOptions({
-            fileRenameFunction: (file) => {
-                const uniqID = 'CoverProject_' + Math.random().toString(36).substr(2, 9); // ใช้ Math.random() เพื่อสร้าง uniqID
-                return `${uniqID}${file.extension}`; // ต่อด้วยนามสกุลของไฟล์
             },
         });
     </script>
@@ -961,7 +860,7 @@ if (!empty($project_slideshow)) {
                     formData.append('file', file);
 
                     try {
-                        const loadingText = 'กำลังอัปโหลดไฟล์...';
+                        const loadingText = 'Uploading image...';
                         const range = quill.getSelection();
                         quill.insertText(range.index, loadingText);
 
@@ -990,6 +889,7 @@ if (!empty($project_slideshow)) {
             };
         });
 
+
         // ฟังก์ชั่นอัปโหลดภาพจาก Clipboard
         quill.root.addEventListener('paste', function(e) {
             const clipboardItems = e.clipboardData.items;
@@ -1013,13 +913,10 @@ if (!empty($project_slideshow)) {
                 formData.append('file', file);
 
                 try {
-                    const loadingText = 'กำลังอัปโหลดไฟล์...';
+                    const loadingText = 'Uploading image...';
                     const range = quill.getSelection();
-
-                    // ใส่ข้อความกำลังอัพโหลด
                     quill.insertText(range.index, loadingText);
 
-                    // อัพโหลดรูป
                     const response = await fetch('ajax/quill_upload.php', {
                         method: 'POST',
                         body: formData,
@@ -1032,9 +929,7 @@ if (!empty($project_slideshow)) {
                         // แก้ไขการสร้าง path ให้ลบเครื่องหมาย / ออกหนึ่งตัว
                         const imagePath = data.path.replace('../../assets', '/assets/');
 
-                        // ลบข้อความกำลังอัพโหลด
                         quill.deleteText(range.index, loadingText.length);
-                        // แทรกรูปที่อัพโหลด
                         quill.insertEmbed(range.index, 'image', imagePath);
                     } else {
                         alert('อัปเดตภาพไม่สำเร็จ: ' + data.message);
@@ -1044,14 +939,11 @@ if (!empty($project_slideshow)) {
                 }
             }
         }
-
+        // ลบรูปออกจากโฟลเดอร์เมื่อมีการลบรูปใน Quill Editor
         quill.on('text-change', function(delta, oldContents, source) {
             const removedImages = [];
-
             delta.ops.forEach((op, index) => {
-                // ตรวจสอบว่ามีการลบข้อมูลในตำแหน่งนี้หรือไม่
                 if (op.delete && oldContents.ops[index]?.insert?.image) {
-                    // ถ้าลบเป็นรูป ให้เก็บ path ของรูปที่ลบ
                     removedImages.push(oldContents.ops[index].insert.image);
                 }
             });
@@ -1059,8 +951,8 @@ if (!empty($project_slideshow)) {
             if (removedImages.length > 0) {
                 removedImages.forEach(async (imagePath) => {
                     if (imagePath && typeof imagePath === 'string') {
-                        // หากพบรูปภาพที่จะลบ ให้ลบรูปภาพนั้น
-                        let correctedPath = '../../' + imagePath.replace(/\/+/g, '/');
+                        // เพิ่ม ../../ ข้างหน้า path
+                        let correctedPath = '../../' + imagePath.replace(/\/+/g, '/'); // เพิ่ม ../../ และลบเครื่องหมาย / เกิน
 
                         try {
                             const response = await fetch('ajax/quill_delete.php', {
@@ -1079,11 +971,13 @@ if (!empty($project_slideshow)) {
                                     console.error('Failed to delete image:', correctedPath, data.message);
                                 }
                             } else {
-                                console.error('Error deleting image:', response.status, correctedPath);
+                                console.error('HTTP error deleting image:', response.status, correctedPath);
                             }
                         } catch (error) {
                             console.error('Error deleting image:', error, correctedPath);
                         }
+                    } else {
+                        console.log('Invalid image path:', imagePath);
                     }
                 });
             }
@@ -1119,7 +1013,7 @@ if (!empty($project_slideshow)) {
                         dzMessage.style.display = "block";
                     }
 
-                    var filePath = file.serverFilePath || file.name; // ใช้ชื่อไฟล์จาก server หรือชื่อไฟล์ที่ส่งจาก client
+                    var filePath = file.serverFilePath; // รับชื่อไฟล์ที่แปลงแล้วจากเซิร์ฟเวอร์
 
                     // ส่งคำขอลบไฟล์จากเซิร์ฟเวอร์
                     var xhr = new XMLHttpRequest();
@@ -1127,23 +1021,11 @@ if (!empty($project_slideshow)) {
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.onreadystatechange = function() {
                         if (xhr.readyState == 4 && xhr.status == 200) {
-                            try {
-                                var response = JSON.parse(xhr.responseText); // ใช้ JSON.parse เพื่อตรวจสอบการตอบกลับ
-                                if (response.success) {
-                                    console.log("File removed successfully: " + filePath);
-                                } else {
-                                    console.error("Error removing file: " + response.message);
-                                }
-                            } catch (e) {
-                                console.error("Error parsing JSON response: ", e);
-                                console.log(xhr.responseText); // ดูข้อมูลดิบจากเซิร์ฟเวอร์
-                            }
+                            console.log("File removed successfully: " + filePath);
                         }
                     };
                     xhr.send("filename=" + encodeURIComponent(filePath));
                 });
-
-
 
                 // เมื่ออัปโหลดไฟล์เสร็จ
                 this.on("success", function(file, response) {
@@ -1174,7 +1056,7 @@ if (!empty($project_slideshow)) {
 
                     // นำ path ไฟล์มาทำความสะอาด และสร้าง mockFile
                     existingFiles.forEach(function(filePath) {
-                        var cleanedFilePath = filePath.replace(/^(\.\.\/){1}/, '');
+                        var cleanedFilePath = filePath.replace(/^(\.\.\/){0}/, ''); // ตัวเลขคือการลบจำนวน ../ ออกจาก path
 
                         // สร้าง mockFile
                         var mockFile = {
@@ -1189,10 +1071,7 @@ if (!empty($project_slideshow)) {
                     });
 
                     // แสดงค่าใน input[name='slideshow_image']
-                    let updatedFiles = existingFiles.map(file => file.replace(/^(\.\.\/)/, ''));
-
-                    // Join the paths into a comma-separated string and set it in the input field
-                    document.querySelector("input[name='slideshow_image']").value = updatedFiles.join(',');
+                    document.querySelector("input[name='slideshow_image']").value = existingFiles.join(',');
                 }
 
 
@@ -1377,14 +1256,10 @@ if (!empty($project_slideshow)) {
         // ============================
         //       Fetch Categories
         // ============================
+
         fetch('ajax/get_category.php')
             .then(response => response.json())
             .then(categories => {
-                if (!categories || categories.length === 0) {
-                    console.error("No categories found.");
-                    return;
-                }
-
                 const categoryInput = document.querySelector('input[name=category]');
                 const categoryIdInput = document.querySelector('input[name=category_id]'); // Hidden input
 
@@ -1396,7 +1271,7 @@ if (!empty($project_slideshow)) {
                     })),
                     userInput: false,
                     maxTags: 1,
-                    placeholder: "เลือกหมวดหมู่...",
+                    placeholder: "เลือกหมวดหมู่..."
                 });
 
                 // ตั้งค่าหมวดหมู่เริ่มต้น (ถ้ามี)
@@ -1413,23 +1288,31 @@ if (!empty($project_slideshow)) {
                 }
 
                 // เมื่อเปลี่ยนค่า Category
-                tagifyCategory.on('change', e => {
-                    const selectedCategory = JSON.parse(e.detail.value)[0] || {};
-                    categoryIdInput.value = selectedCategory.id || ''; // อัปเดตค่าใน hidden input
-                    updateSubcategories(selectedCategory.id); // อัปเดต Subcategories
+                tagifyCategory.on('change', (e) => {
+                    const selectedCategory = JSON.parse(e.detail.value)[0];
+                    const selectedCategoryId = selectedCategory ? selectedCategory.id : null;
+
+                    categoryIdInput.value = selectedCategoryId || ''; // อัปเดตค่าใน hidden input
+                    updateSubcategories(selectedCategoryId); // อัปเดต Subcategories
+
+                    // แสดงค่า category ที่เลือก
+                    console.log('Selected Category:', selectedCategory);
                 });
 
                 // ลบค่า Category
                 tagifyCategory.on('remove', () => {
                     categoryIdInput.value = ''; // เคลียร์ค่าใน hidden input
                     clearSubcategories(); // เคลียร์ Subcategories
+                    console.log('Category removed');
                 });
             })
             .catch(error => console.error('Error fetching categories:', error));
 
+
         // ============================
         //      Fetch Subcategories
         // ============================
+
         let tagifySubcategory;
         const subcategoryInput = document.querySelector('.blog-tags');
         const subcategoryIdInput = document.querySelector('input[name=subcategory_id]'); // Hidden input
@@ -1443,79 +1326,104 @@ if (!empty($project_slideshow)) {
             fetch(`ajax/get_subcategory.php?category_id=${categoryId}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (!data || data.length === 0) {
-                        console.warn("No subcategories found for this category.");
-                        clearSubcategories();
-                        return;
-                    }
+                    console.log('Fetched Data:', data);
 
+                    // Process the fetched data to create the subcategories array
                     const subcategories = data.map(item => ({
                         value: item.value,
-                        id: String(item.id), // Ensure ID is a string
+                        id: String(item.id) // Ensure the ID is a string for consistency
                     }));
 
+                    console.log('Processed Subcategories:', subcategories); // Log the processed subcategories array
+
+                    // สร้างหรืออัปเดต Tagify สำหรับ Subcategory
                     if (!tagifySubcategory) {
-                        // Create Tagify for Subcategories
                         tagifySubcategory = new Tagify(subcategoryInput, {
-                            whitelist: subcategories,
+                            whitelist: subcategories.map(item => ({
+                                value: item.value,
+                                id: item.id
+                            })),
                             userInput: false,
                             placeholder: "เลือกหมวดหมู่ย่อย...",
                             enforceWhitelist: true,
                         });
 
-                        // เพิ่มแท็กเริ่มต้น (ถ้ามี)
-                        addInitialSubcategories(subcategories);
+                        // เพิ่มแท็กอัตโนมัติจากค่าใน hidden input
+                        const initialSubCategoryIds = subcategoryIdInput.value.split(',').map(id => id.trim());
 
-                        // Handle tag changes
-                        tagifySubcategory.on('change', handleSubcategoryChange);
-                        tagifySubcategory.on('remove', handleSubcategoryRemove);
+                        // เพิ่มแท็กหากมีค่าใน hidden input
+                        if (initialSubCategoryIds.length > 0) {
+                            initialSubCategoryIds.forEach(id => {
+                                const initialSubCategory = subcategories.find(cat => cat.id === id);
+
+                                if (initialSubCategory) {
+                                    // เพิ่มแท็กลงใน Tagify
+                                    tagifySubcategory.addTags([{
+                                        value: initialSubCategory.value,
+                                        id: initialSubCategory.id
+                                    }]);
+                                } else {
+                                    // แจ้งเตือนหากไม่พบหมวดหมู่ย่อยในรายการที่ดึงมา
+                                    console.warn(`Subcategory with ID ${id} not found in fetched data.`);
+                                }
+                            });
+                        } else {
+                            console.log('No initial subcategory IDs to add.');
+                        }
+
+                        // ฟังก์ชันจัดการการเปลี่ยนแปลงแท็ก
+                        tagifySubcategory.on('change', (e) => {
+                            const selectedTags = JSON.parse(e.detail.value) || [];
+                            console.log("Selected Tags:", selectedTags);
+
+                            const selectedIds = selectedTags.map(tag => tag.id); // ดึง id จากแต่ละ tag
+                            console.log("Selected IDs:", selectedIds);
+
+                            if (selectedIds.length > 0) {
+                                subcategoryIdInput.value = selectedIds.join(',');
+                                console.log('Selected Subcategory IDs:', selectedIds);
+                            } else {
+                                console.log('No subcategory IDs found');
+                                subcategoryIdInput.value = ''; // เคลียร์ค่าใน subcategoryIdInput ถ้าไม่มี tag
+                            }
+                        });
+
+                        // ฟังก์ชันจัดการการลบแท็ก
+                        tagifySubcategory.on('remove', (e) => {
+                            const removedTag = e.detail.data;
+                            console.log('Removed Tag:', removedTag);
+
+                            const removedTagId = removedTag.id;
+                            const currentIds = subcategoryIdInput.value.split(',').filter(id => id !== removedTagId.toString());
+                            subcategoryIdInput.value = currentIds.join(',');
+                            console.log('Updated Subcategory IDs after removal:', currentIds);
+                        });
+
                     } else {
-                        // Update existing Tagify instance
-                        tagifySubcategory.settings.whitelist = subcategories;
+                        // อัปเดตค่า whitelist และแสดง dropdown ใหม่
+                        tagifySubcategory.settings.whitelist = subcategories.map(item => ({
+                            value: item.value,
+                            id: item.id
+                        }));
                         tagifySubcategory.removeAllTags();
                         tagifySubcategory.dropdown.hide();
+                        tagifySubcategory.dropdown.show();
                     }
+
                 })
                 .catch(error => console.error('Error fetching subcategories:', error));
+
         }
 
-        function addInitialSubcategories(subcategories) {
-            const initialSubCategoryIds = subcategoryIdInput.value.split(',').map(id => id.trim());
-            initialSubCategoryIds.forEach(id => {
-                const initialSubCategory = subcategories.find(cat => cat.id === id);
-                if (initialSubCategory) {
-                    tagifySubcategory.addTags([{
-                        value: initialSubCategory.value,
-                        id: initialSubCategory.id
-                    }]);
-                } else {
-                    console.warn(`Subcategory with ID ${id} not found.`);
-                }
-            });
-        }
-
-        function handleSubcategoryChange(e) {
-            const selectedTags = JSON.parse(e.detail.value) || [];
-            const selectedIds = selectedTags.map(tag => tag.id);
-
-            subcategoryIdInput.value = selectedIds.join(','); // อัปเดต hidden input
-        }
-
-        function handleSubcategoryRemove(e) {
-            const removedTag = e.detail.data;
-            const currentIds = subcategoryIdInput.value.split(',').filter(id => id !== removedTag.id);
-            subcategoryIdInput.value = currentIds.join(',');
-        }
 
         function clearSubcategories() {
             if (tagifySubcategory) {
                 tagifySubcategory.settings.whitelist = [];
                 tagifySubcategory.removeAllTags();
             }
-            subcategoryIdInput.value = ''; // Clear hidden input
+            subcategoryIdInput.value = ''; // เคลียร์ค่าใน hidden input
         }
     </script>
-
 
 
 
@@ -1539,59 +1447,11 @@ if (!empty($project_slideshow)) {
     </script>
 
     <script>
-        // ตั้งค่าเวลานับถอยหลัง (session timeout)
-        const sessionTimeout = <?php echo $session_timeout; ?> * 1000; // 100 นาที = 6000000 มิลลิวินาที
-        let countdownTime = sessionTimeout;
-
-        // ฟังก์ชันนับถอยหลัง
-        function updateCountdown() {
-            const countdownElement = document.getElementById("countdown");
-
-            // คำนวณจำนวนวัน, ชั่วโมง, นาที และวินาที
-            const totalSeconds = Math.floor(countdownTime / 1000); // วินาทีทั้งหมด
-            const totalMinutes = Math.floor(totalSeconds / 60); // นาทีทั้งหมด
-            const totalHours = Math.floor(totalMinutes / 60); // ชั่วโมงทั้งหมด
-            const totalDays = Math.floor(totalHours / 24); // จำนวนวันทั้งหมด
-
-            const remainingMinutes = totalMinutes % 60; // นาทีที่เหลือ
-            const remainingSeconds = totalSeconds % 60; // วินาทีที่เหลือ
-
-            let displayTime = '';
-
-            // แสดงเป็นวัน, ชั่วโมง, นาที, หรือ วินาที
-            if (totalDays > 0) {
-                displayTime = `เหลืออีก ${totalDays} วัน ${remainingHours} ชั่วโมง ${remainingMinutes} นาที ${remainingSeconds} วินาที`;
-            } else if (totalHours > 0) {
-                displayTime = `เหลืออีก ${totalHours} ชั่วโมง ${remainingMinutes} นาที ${remainingSeconds} วินาที`;
-            } else if (totalMinutes > 0) {
-                displayTime = `เหลืออีก ${remainingMinutes} นาที ${remainingSeconds} วินาที`;
-            } else {
-                displayTime = `เหลืออีก ${remainingSeconds} วินาที`;
-            }
-
-            countdownElement.textContent = displayTime;
-
-            if (countdownTime <= 0) {
-                // เมื่อเวลาหมด ลบ session
-                navigator.sendBeacon('ajax/delete_session.php');
-                countdownElement.textContent = "เหลืออีก 00 วินาที";
-
-                // รีเฟรชหน้าเว็บเมื่อเวลาหมด
-                location.reload();
-            } else {
-                countdownTime -= 1000; // ลดเวลาลงทีละ 1 วินาที
-                setTimeout(updateCountdown, 1000); // อัพเดตทุก 1 วินาที
-            }
-        }
-
-        // เริ่มต้นการนับถอยหลัง
-        updateCountdown();
-
-        // เมื่อผู้ใช้ออกจากหน้า (unload event) ทำการลบ session
         window.addEventListener('unload', () => {
             navigator.sendBeacon('ajax/delete_session.php');
         });
     </script>
+
 
     <!-- END PAGE LEVEL SCRIPTS -->
 </body>
@@ -1618,22 +1478,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $CreateBy_UserID = $_SESSION['User_ID'];
         $category_id = $_POST['category_id'];
         $subcategory = $_POST['subcategory_id']; // อาจจะเป็น array หรือไม่เป็น array
+
+        // Remove the first occurrence of '../'
+        $cover_image_path = preg_replace('/^(\.\.\/)/', '', $cover_image_path, 1);
+
         $slideshow_image_path = $_POST['slideshow_image'];
 
-        // // Remove the first occurrence of '../'
-        // $cover_image_path = preg_replace('/^(\.\.\/)/', '', $cover_image_path, 1);
+        // Split the paths by commas
+        $image_paths = explode(',', $slideshow_image_path);
 
+        // Loop through each path and remove the first '../' occurrence
+        foreach ($image_paths as &$path) {
+            $path = preg_replace('/^(\.\.\/)/', '', $path);
+        }
 
-        // // Split the paths by commas
-        // $image_paths = explode(',', $slideshow_image_path);
-
-        // // Loop through each path and remove the first '../' occurrence
-        // foreach ($image_paths as &$path) {
-        //     $path = preg_replace('/^(\.\.\/)/', '', $path);
-        // }
-
-        // // Join the paths back into a single string
-        // $slideshow_image_path = implode(',', $image_paths);
+        // Join the paths back into a single string
+        $slideshow_image_path = implode(',', $image_paths);
 
         // แปลง JSON เป็น array
         $owner_data = json_decode($project_owner, true);

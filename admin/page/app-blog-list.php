@@ -357,7 +357,7 @@
             // ฟังก์ชันลบหลายๆ รายการ
             function deleteMultiple(ids) {
                 Swal.fire({
-                    title: 'แน่ใจใช่มั้ย ?',
+                    title: 'แน่ใจใช่ไหม ?',
                     text: "หากลบ จะไม่สามารถกู้ข้อมูลกลับมาได้อีก!",
                     icon: 'warning',
                     showCancelButton: true,
@@ -415,7 +415,7 @@
             var projectId = $(this).data('id'); // ดึง ID ของโปรเจคที่ต้องการลบ
 
             Swal.fire({
-                title: 'แน่ใจใช่มั้ย ?',
+                title: 'แน่ใจใช่ไหม ?',
                 text: "หากลบ จะไม่สามารถกู้ข้อมูลกลับมาได้อีก!",
                 icon: 'warning',
                 showCancelButton: true,

@@ -4,7 +4,7 @@ include "../../db/connection.php";
 // ini_set('display_errors', 1);
 
 // Define session expiration time (1 minutes = 60 seconds)
-$session_timeout = 60;
+$session_timeout = 300; // 5 นาที
 
 // Retrieve data from POST or SESSION, with fallback to empty string
 $project_title = $_POST['project_title'] ?? $_SESSION['project_title'] ?? '';
@@ -12,8 +12,11 @@ $project_detail = $_POST['project_detail'] ?? $_SESSION['project_detail'] ?? '';
 $project_owner = $_POST['project_owner'] ?? $_SESSION['project_owner'] ?? '';
 $cover_image = $_POST['cover_image'] ?? $_SESSION['cover_image'] ?? '';
 $project_slideshow = $_POST['slideshow_image'] ?? $_SESSION['slideshow_image'] ?? '';
-$category = $_POST['category'] ?? ''; // Fallback to empty string if not set
-$subcategory = $_POST['subcategory'] ?? ''; // Fallback to empty string if not set
+$category = $_POST['category'] ?? $_SESSION['category'] ?? '';
+$category_id = $_POST['category_id'] ?? $_SESSION['category_id'] ?? '';
+$subcategory = $_POST['subcategory'] ?? $_SESSION['subcategory'] ?? '';
+$subcategory_id = $_POST['subcategory_id'] ?? $_SESSION['subcategory_id'] ?? '';
+
 
 // Check if the session data has been set and if it has expired
 if (isset($_SESSION['project_time'])) {
@@ -45,6 +48,10 @@ if (isset($_SESSION['project_time'])) {
         unset($_SESSION['project_detail']);
         unset($_SESSION['project_owner']);
         unset($_SESSION['slideshow_image']);
+        unset($_SESSION['category']);
+        unset($_SESSION['category_id']);
+        unset($_SESSION['subcategory']);
+        unset($_SESSION['subcategory_id']);
         unset($_SESSION['project_time']);
     }
 }
@@ -60,8 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $project_owner = $_POST['project_owner'] ?? $_SESSION['project_owner'] ?? '';
         $cover_image = $_POST['cover_image'] ?? $_SESSION['cover_image'] ?? '';
         $project_slideshow = $_POST['slideshow_image'] ?? $_SESSION['slideshow_image'] ?? '';
-        $category = $_POST['category_id'];
-        $subcategory = $_POST['subcategory_id'];
+        $category = $_POST['category'] ?? $_SESSION['category'] ?? '';
+        $category_id = $_POST['category_id'] ?? $_SESSION['category_id'] ?? '';
+        $subcategory = $_POST['subcategory'] ?? $_SESSION['subcategory'] ?? '';
+        $subcategory_id = $_POST['subcategory_id'] ?? $_SESSION['subcategory_id'] ?? '';
 
 
         // Store the current time in session to track session expiration
@@ -98,8 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'project_description' => $project_detail,
                 'project_owner' => $project_owner,
                 'project_slideshow' => $project_slideshow,
-                'Project_category' => $category,
-                'Project_subcategory' => $subcategory,
+                'Project_category' => $category_id,
+                'Project_subcategory' => $subcategory_id,
+                'category' => $category,
+                'subcategory' => $subcategory,
                 'start_date' => '2024-12-01',
                 'end_date' => '2025-12-01',
                 'status' => 'กำลังดำเนินการ'
@@ -209,10 +220,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <!-- BREADCRUMB -->
                     <div class="page-meta">
-                        <div class="flex justify-content-start">
-                            <!-- <button class="btn btn-light">
-                                <p class="title-form">ย้อนกลับ</p>
-                            </button> -->
+                        <div class="d-flex justify-content-start mb-2">
+                            <!-- ปุ่มย้อนกลับ (ไม่มีสี) -->
+                            <a href="app-blog-list.php" class="btn btn-outline-success btn-sm d-flex align-items-center px-2 py-1">
+                                <iconify-icon icon="iconamoon:arrow-left-2-light" width="20" height="20" class=""></iconify-icon>
+                                <span class="">ย้อนกลับ</span>
+                            </a>
+                        </div>
+
+                        <div class="d-flex justify-content-start">
                             <h2 class="title-form">เพิ่มข้อมูลโปรเจคใหม่</h2>
                         </div>
                     </div>
@@ -270,10 +286,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="row mb-4">
                                         <div class="col-sm-12">
                                             <label class="title-form">เจ้าของโปรเจค</label>
-                                            <input name="project_owner" placeholder="กรุณาเลือกเจ้าของโปรเจค" value='<?php echo isset($_SESSION['project_owner']) ? json_encode($_SESSION['project_owner']) : ''; ?>'>>
-                                            <?php
-                                            var_dump($_SESSION['project_owner']);
-                                            ?>
+                                            <input
+                                                name="project_owner"
+                                                placeholder="กรุณาเลือกเจ้าของโปรเจค"
+                                                value='<?php echo isset($_SESSION['project_owner']) ? htmlspecialchars(json_encode($_SESSION['project_owner']), ENT_QUOTES, 'UTF-8') : '[]'; ?>'>
                                         </div>
                                     </div>
                                 </div>
@@ -299,14 +315,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="row">
                                         <div class="col-xxl-12 col-md-12 mb-4">
                                             <label for="category">หมวดหมู่</label>
-                                            <input id="category" name="category" placeholder="เลือกหมวดหมู่..." value="<?php $category ?>">
-                                            <input type="text" class="form-control mt-2" name="category_id" id="category_id" value="">
+                                            <input id="category" name="category" placeholder="เลือกหมวดหมู่...">
+                                            <input type="text" class="form-control mt-2" name="category_id" id="category_id" value="<?php echo htmlspecialchars($_SESSION['category_id']); ?>">
                                         </div>
 
                                         <div class="col-xxl-12 col-md-12 mb-4">
                                             <label for="tags title-form">หมวดหมู่ย่อย</label>
-                                            <input id="subcategory" class="blog-tags" value="" name="subcategory" placeholder="เลือกหมวดหมู่ย่อย..." value="<?php $subcategory ?>">
-                                            <input type="text" class="form-control mt-2" name="subcategory_id" id="subcategory_id">
+                                            <input id="subcategory" class="blog-tags" name="subcategory" placeholder="เลือกหมวดหมู่ย่อย...">
+                                            <input type="text" class="form-control mt-2" name="subcategory_id" id="subcategory_id" value="<?php echo htmlspecialchars($_SESSION['subcategory_id']); ?>">
                                         </div>
                                         <div class="col-xxl-12 col-md-12 mb-4">
                                             <button type="submit" name="Preview" value="Preview" class="btn btn-secondary w-100">Preview</button>
@@ -356,7 +372,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="../src/plugins/src/filepond/FilePondPluginImageTransform.min.js"></script>
     <script src="../src/plugins/src/filepond/filepondPluginFileValidateSize.min.js"></script>
     <script src="../src/plugins/src/filepond/FilePondPluginImageValidateSize.js"></script>
-    <script src="https://unpkg.com/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.js"></script>
+    <script src="../src/plugins/src/filepond/filepond-plugin-file-poster.js"></script>
+    <script src="../src/plugins/src/filepond/filepond-plugin-file-rename.js"></script>
+
 
 
     <script src="../src/plugins/src/tagify/tagify.min.js"></script>
@@ -370,7 +388,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- FilePond For Upload Cover -->
 
     <script>
-        FilePond.registerPlugin(FilePondPluginFileValidateType, FilePondPluginFileValidateSize, FilePondPluginImageValidateSize, FilePondPluginImagePreview, FilePondPluginFilePoster);
+        FilePond.registerPlugin(FilePondPluginFileValidateType, FilePondPluginFileValidateSize, FilePondPluginImageValidateSize, FilePondPluginImagePreview, FilePondPluginFilePoster, FilePondPluginFileRename);
 
         const filePathFromDB = '<?= $cover_image ?>'; // ตัวอย่าง: ../../../assets/images/project/cover/filename.webp
 
@@ -439,6 +457,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     console.error('Error processing file:', error);
                 }
+            },
+        });
+        FilePond.setOptions({
+            fileRenameFunction: (file) => {
+                const uniqID = 'CoverProject_' + Math.random().toString(36).substr(2, 9); // ใช้ Math.random() เพื่อสร้าง uniqID
+                return `${uniqID}${file.extension}`; // ต่อด้วยนามสกุลของไฟล์
             },
         });
     </script>
@@ -524,7 +548,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     formData.append('file', file);
 
                     try {
-                        const loadingText = 'Uploading image...';
+                        const loadingText = 'กำลังอัปโหลดไฟล์...';
                         const range = quill.getSelection();
                         quill.insertText(range.index, loadingText);
 
@@ -553,7 +577,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             };
         });
 
-
         // ฟังก์ชั่นอัปโหลดภาพจาก Clipboard
         quill.root.addEventListener('paste', function(e) {
             const clipboardItems = e.clipboardData.items;
@@ -577,10 +600,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 formData.append('file', file);
 
                 try {
-                    const loadingText = 'Uploading image...';
+                    const loadingText = 'กำลังอัปโหลดไฟล์...';
                     const range = quill.getSelection();
+
+                    // ใส่ข้อความกำลังอัพโหลด
                     quill.insertText(range.index, loadingText);
 
+                    // อัพโหลดรูป
                     const response = await fetch('ajax/quill_upload.php', {
                         method: 'POST',
                         body: formData,
@@ -593,7 +619,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // แก้ไขการสร้าง path ให้ลบเครื่องหมาย / ออกหนึ่งตัว
                         const imagePath = data.path.replace('../../assets', '/assets/');
 
+                        // ลบข้อความกำลังอัพโหลด
                         quill.deleteText(range.index, loadingText.length);
+                        // แทรกรูปที่อัพโหลด
                         quill.insertEmbed(range.index, 'image', imagePath);
                     } else {
                         alert('อัปเดตภาพไม่สำเร็จ: ' + data.message);
@@ -603,11 +631,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-        // ลบรูปออกจากโฟลเดอร์เมื่อมีการลบรูปใน Quill Editor
+
         quill.on('text-change', function(delta, oldContents, source) {
             const removedImages = [];
+
             delta.ops.forEach((op, index) => {
+                // ตรวจสอบว่ามีการลบข้อมูลในตำแหน่งนี้หรือไม่
                 if (op.delete && oldContents.ops[index]?.insert?.image) {
+                    // ถ้าลบเป็นรูป ให้เก็บ path ของรูปที่ลบ
                     removedImages.push(oldContents.ops[index].insert.image);
                 }
             });
@@ -615,8 +646,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (removedImages.length > 0) {
                 removedImages.forEach(async (imagePath) => {
                     if (imagePath && typeof imagePath === 'string') {
-                        // เพิ่ม ../../ ข้างหน้า path
-                        let correctedPath = '../../' + imagePath.replace(/\/+/g, '/'); // เพิ่ม ../../ และลบเครื่องหมาย / เกิน
+                        // หากพบรูปภาพที่จะลบ ให้ลบรูปภาพนั้น
+                        let correctedPath = '../../' + imagePath.replace(/\/+/g, '/');
 
                         try {
                             const response = await fetch('ajax/quill_delete.php', {
@@ -635,13 +666,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     console.error('Failed to delete image:', correctedPath, data.message);
                                 }
                             } else {
-                                console.error('HTTP error deleting image:', response.status, correctedPath);
+                                console.error('Error deleting image:', response.status, correctedPath);
                             }
                         } catch (error) {
                             console.error('Error deleting image:', error, correctedPath);
                         }
-                    } else {
-                        console.log('Invalid image path:', imagePath);
                     }
                 });
             }
@@ -672,12 +701,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
 
                 // เมื่อไฟล์ถูกลบ
+                // เมื่อไฟล์ถูกลบ
                 this.on("removedfile", function(file) {
                     if (this.files.length === 0 && dzMessage) {
                         dzMessage.style.display = "block";
                     }
 
-                    var filePath = file.serverFilePath; // รับชื่อไฟล์ที่แปลงแล้วจากเซิร์ฟเวอร์
+                    var filePath = file.serverFilePath || file.name; // ใช้ชื่อไฟล์จาก server หรือชื่อไฟล์ที่ส่งจาก client
 
                     // ส่งคำขอลบไฟล์จากเซิร์ฟเวอร์
                     var xhr = new XMLHttpRequest();
@@ -685,11 +715,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     xhr.onreadystatechange = function() {
                         if (xhr.readyState == 4 && xhr.status == 200) {
-                            console.log("File removed successfully: " + filePath);
+                            try {
+                                var response = JSON.parse(xhr.responseText); // ใช้ JSON.parse เพื่อตรวจสอบการตอบกลับ
+                                if (response.success) {
+                                    console.log("File removed successfully: " + filePath);
+                                } else {
+                                    console.error("Error removing file: " + response.message);
+                                }
+                            } catch (e) {
+                                console.error("Error parsing JSON response: ", e);
+                                console.log(xhr.responseText); // ดูข้อมูลดิบจากเซิร์ฟเวอร์
+                            }
                         }
                     };
                     xhr.send("filename=" + encodeURIComponent(filePath));
                 });
+
+
 
                 // เมื่ออัปโหลดไฟล์เสร็จ
                 this.on("success", function(file, response) {
@@ -750,59 +792,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
 
 
-    <!-- Fetch Owner Project -->
     <script>
         var inputElm = document.querySelector('input[name=project_owner]');
-        var preSelectedOwner = inputElm.value; // Get the value (if any)
-        console.log(preSelectedOwner); // ตรวจสอบค่าของ preSelectedOwner
+        var preSelectedOwner = inputElm.value; // Get the JSON string from the input field
+        var preSelectedOwnerArray = []; // Array to hold User_IDs from session
 
-        // แปลง preSelectedOwner จาก JSON string ให้เป็น object
-        var preSelectedOwnerObj = preSelectedOwner ? JSON.parse(preSelectedOwner) : null;
-        console.log(preSelectedOwnerObj); // ตรวจสอบค่าหลังจากแปลงเป็น object
+        // Parse the JSON string to array
+        try {
+            preSelectedOwnerArray = JSON.parse(preSelectedOwner); // Convert the JSON string to an array
+            console.log("Pre-selected owner (parsed):", preSelectedOwnerArray);
+        } catch (e) {
+            console.error("Error parsing preSelectedOwner JSON:", e);
+        }
 
         function tagTemplate(tagData) {
+            console.log(tagData);
             return `
-    <tag title="${tagData.User_ID}"
-            contenteditable='false'
-            spellcheck='false'
+        <tag title="${tagData.User_ID}"
+            contenteditable="false"
+            spellcheck="false"
             tabIndex="-1"
-            class="tagify__tag ${tagData.class ? tagData.class : ""}"
-            ${this.getAttributes(tagData)}>
-        <x title='' class='tagify__tag__removeBtn' role='button' aria-label='remove tag'></x>
-        <div>
-            <div class='tagify__tag__avatar-wrap'>
-                <img onerror="this.style.visibility='hidden'" src="${tagData.User_Image}">
+            class="tagify__tag ${tagData.class ? tagData.class : ""}">
+            <x title="" class="tagify__tag__removeBtn" role="button" aria-label="remove tag"></x>
+            <div>
+                <div class="tagify__tag__avatar-wrap">
+                    <img onerror="this.style.visibility='hidden'" src="${tagData.User_Image}">
+                </div>
+                <span class="tagify__tag-text">${tagData.User_FirstName} ${tagData.User_Lastname}</span>
             </div>
-            <span class='tagify__tag-text'>${tagData.User_FirstName} ${tagData.User_Lastname}</span>
-        </div>
-    </tag>
-`;
+        </tag>
+    `;
         }
 
-        function suggestionItemTemplate(tagData) {
-            return `
-    <div ${this.getAttributes(tagData)}
-        class='tagify__dropdown__item ${tagData.class ? tagData.class : ""}'
-        tabindex="0"
-        role="option">
-        ${tagData.User_Image ? `
-        <div class='tagify__dropdown__item__avatar-wrap'>
-            <img onerror="this.style.visibility='hidden'" src="${tagData.User_Image}">
-        </div>` : ''}
-        <strong>${tagData.User_FirstName} ${tagData.User_Lastname}</strong>
-        <span>${tagData.Position_Name}</span>
-    </div>
-`;
-        }
 
-        // ดึงข้อมูลจาก API
+        // Fetch user data from the server
         async function fetchUsers() {
             try {
-                let response = await fetch('ajax/fetch_owner.php');
-                if (!response.ok) throw new Error('Network response was not ok');
-                let data = await response.json();
+                const response = await fetch('ajax/fetch_owner.php');
+                if (!response.ok) throw new Error('Network error');
+                const userList = await response.json();
 
-                return data.map(user => ({
+                return userList.map(user => ({
                     value: user.User_ID,
                     User_ID: user.User_ID,
                     User_FirstName: user.User_FirstName,
@@ -816,7 +846,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Initialize Tagify
+        // Main function to initialize and populate tags
         fetchUsers().then((userList) => {
             if (!Array.isArray(userList)) {
                 console.error('User list should be an array');
@@ -837,21 +867,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     tag: tagTemplate,
                     dropdownItem: suggestionItemTemplate
                 },
-                whitelist: userList // ใช้ข้อมูลจาก API
+                whitelist: userList
             });
 
-            console.log(preSelectedOwnerObj);
-            console.log(userList)
+            // ตรวจสอบค่าของ preSelectedOwnerArray
+            console.log("preSelectedOwnerArray:", preSelectedOwnerArray);
 
+            // Process the session data and add the selected tags
+            if (Array.isArray(preSelectedOwnerArray) && preSelectedOwnerArray.length > 0) {
+                const preSelectedTags = preSelectedOwnerArray.map(sessionData => {
+                    // ตรวจสอบว่ามีข้อมูลผู้ใช้ใน userList ที่ตรงกับ sessionData.User_ID หรือไม่
+                    const user = userList.find(user => user.User_ID === sessionData.User_ID);
+                    if (user) {
+                        console.log("Found user in userList:", user); // แสดงข้อมูลผู้ใช้ที่ตรงกัน
+                        return {
+                            value: user.User_ID,
+                            User_ID: user.User_ID,
+                            User_FirstName: user.User_FirstName,
+                            User_Lastname: user.User_Lastname,
+                            User_Image: user.User_Image,
+                            Position_Name: user.Position_Name
+                        };
+                    } else {
+                        console.warn(`User not found for ID: ${sessionData.User_ID}`); // หากไม่พบผู้ใช้ใน userList
+                        return null;
+                    }
+                }).filter(Boolean);
 
-            // Pre-select the owner if a value is provided in the input field
-            preSelectedOwnerObj.forEach(owner => {
-                const preSelectedUser = userList.find(user => user.User_ID == owner.User_ID);
-                if (preSelectedUser) {
-                    usrList.addTags([preSelectedUser]); // เพิ่ม tag
+                console.log("User select from session: ", preSelectedTags);
+
+                if (preSelectedTags.length > 0) {
+                    usrList.addTags(preSelectedTags);
                 }
-            });
+            } else {
+                console.error("preSelectedOwnerArray is empty or invalid:", preSelectedOwnerArray);
+            }
 
+
+            // Event listeners for dropdown interactions
             usrList.on('dropdown:show dropdown:updated', onDropdownShow);
             usrList.on('dropdown:select', onSelectSuggestion);
 
@@ -884,144 +937,179 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }]);
             }
         });
+
+        function suggestionItemTemplate(tagData) {
+            return `
+        <div ${this.getAttributes(tagData)}
+            class='tagify__dropdown__item ${tagData.class ? tagData.class : ""}'
+            tabindex="0"
+            role="option">
+            ${tagData.User_Image ? `
+                <div class='tagify__dropdown__item__avatar-wrap'>
+                    <img onerror="this.style.visibility='hidden'" src="${tagData.User_Image}">
+                </div>` : ''}
+            <strong>${tagData.User_FirstName} ${tagData.User_Lastname}</strong>
+            <span>${tagData.Position_Name}</span>
+        </div>
+    `;
+        }
     </script>
+
+
 
 
     <script>
-        // เก็บข้อมูล Subcategory
-        let subcategory = [];
-
         // ============================
-        //        Fetch Categories
+        //       Fetch Categories
         // ============================
-
         fetch('ajax/get_category.php')
             .then(response => response.json())
-            .then(data => {
-                const categories = data.map(item => ({
-                    value: item.value,
-                    id: item.id
-                }));
-
-                console.log('Categories:', categories); // ตรวจสอบข้อมูลที่ได้จาก API
+            .then(categories => {
+                if (!categories || categories.length === 0) {
+                    console.error("No categories found.");
+                    return;
+                }
 
                 const categoryInput = document.querySelector('input[name=category]');
+                const categoryIdInput = document.querySelector('input[name=category_id]'); // Hidden input
 
                 // สร้าง Tagify สำหรับ Category
                 const tagifyCategory = new Tagify(categoryInput, {
-                    whitelist: categories,
+                    whitelist: categories.map(item => ({
+                        value: item.value,
+                        id: item.id
+                    })),
                     userInput: false,
                     maxTags: 1,
-                    placeholder: "เลือกหมวดหมู่..."
+                    placeholder: "เลือกหมวดหมู่...",
                 });
 
-                tagifyCategory.on('change', (e) => {
-                    console.log('Tagify Change Event:', e.detail);
-
-                    const selectedCategory = JSON.parse(e.detail.value)[0];
-
-                    const selectedCategoryId = selectedCategory ? selectedCategory.id : null;
-                    console.log('Selected Category ID:', selectedCategoryId);
-
-                    document.querySelector('input[name=category_id]').value = selectedCategoryId;
-
-                    // อัปเดต Subcategories
-                    updateSubcategories(selectedCategoryId);
-                });
-
-                // เมื่อมีการลบ tag
-                tagifyCategory.on('remove', (e) => {
-                    console.log('Tag removed:', e.detail);
-
-                    // เคลียร์ค่าใน input ของ category_id
-                    document.querySelector('input[name=category_id]').value = '';
-                    console.log('Category ID input cleared');
-                });
-
-            })
-            .catch(error => {
-                console.error('Error fetching categories:', error);
-                alert('ไม่สามารถโหลดข้อมูลหมวดหมู่ได้');
-            });
-
-        // ============================
-        //       Fetch Subcategories
-        // ============================
-
-        fetch('ajax/get_subcategory.php')
-            .then(response => response.json())
-            .then(data => {
-                // เก็บ Subcategory ในตัวแปร
-                subcategory = data.map(item => ({
-                    value: item.value,
-                    id: item.id,
-                    category: item.category_id
-                }));
-
-                const subcategoryInput = document.querySelector('.blog-tags');
-
-                // ใช้ Tagify สำหรับ Subcategory (เริ่มต้น whitelist ว่าง)
-                window.tagifySubcategory = new Tagify(subcategoryInput, {
-                    whitelist: subcategory.map(item => item.value), // Set the whitelist here after fetching data
-                    userInput: false,
-                    placeholder: "เลือกหมวดหมู่ย่อย..."
-                });
-
-                // เมื่อเปลี่ยนค่า Subcategory
-                tagifySubcategory.on('change', (e) => {
-                    console.log('Subcategory Change Event:', e.detail); // ตรวจสอบข้อมูล Event
-
-                    if (e.detail.value) {
-                        // แปลงค่า e.detail.value จาก string เป็น array
-                        const selectedTags = JSON.parse(e.detail.value); // แปลง string เป็น array
-
-                        // console.log('Parsed Selected Tags:', selectedTags);
-
-                        // แยก ID ของ subcategories ที่เลือก
-                        const selectedSubcategoryIds = selectedTags.map(tag => {
-                            const subcategoryItem = subcategory.find(item => item.value === tag.value);
-                            return subcategoryItem ? subcategoryItem.id : null; // หาค่า id ของ subcategory ที่ตรงกับ tag
-                        }).filter(id => id !== null); // กรองค่า null ออก
-
-                        // console.log('Selected Subcategory IDs:', selectedSubcategoryIds);
-
-                        // ส่งค่า ID ไปที่ input ที่ซ่อน
-                        const subcategoryInputElement = document.querySelector('input[name=subcategory_id]');
-                        subcategoryInputElement.value = selectedSubcategoryIds.join(','); // รวม ID ด้วยเครื่องหมาย ","
-                        console.log('Updated Subcategory ID input value:', subcategoryInputElement.value);
-                    } else {
-                        console.log('No subcategory tag selected');
-                        const subcategoryInputElement = document.querySelector('input[name=subcategory_id]');
-                        subcategoryInputElement.value = ''; // หากไม่มีการเลือก subcategory ให้เคลียร์ค่า
+                // ตั้งค่าหมวดหมู่เริ่มต้น (ถ้ามี)
+                const initialCategoryId = categoryIdInput.value;
+                if (initialCategoryId) {
+                    const initialCategory = categories.find(cat => cat.id === initialCategoryId);
+                    if (initialCategory) {
+                        tagifyCategory.addTags([{
+                            value: initialCategory.value,
+                            id: initialCategory.id
+                        }]);
+                        updateSubcategories(initialCategoryId);
                     }
+                }
+
+                // เมื่อเปลี่ยนค่า Category
+                tagifyCategory.on('change', e => {
+                    const selectedCategory = JSON.parse(e.detail.value)[0] || {};
+                    categoryIdInput.value = selectedCategory.id || ''; // อัปเดตค่าใน hidden input
+                    updateSubcategories(selectedCategory.id); // อัปเดต Subcategories
                 });
 
-
+                // ลบค่า Category
+                tagifyCategory.on('remove', () => {
+                    categoryIdInput.value = ''; // เคลียร์ค่าใน hidden input
+                    clearSubcategories(); // เคลียร์ Subcategories
+                });
             })
-            .catch(error => {
-                console.error('Error fetching subcategories:', error);
-                alert('ไม่สามารถโหลดข้อมูลหมวดหมู่ย่อยได้');
+            .catch(error => console.error('Error fetching categories:', error));
+
+        // ============================
+        //      Fetch Subcategories
+        // ============================
+        let tagifySubcategory;
+        const subcategoryInput = document.querySelector('.blog-tags');
+        const subcategoryIdInput = document.querySelector('input[name=subcategory_id]'); // Hidden input
+        const subcategoryIdField = document.querySelector('#subcategory_id'); // Input field from PHP session
+
+        // Create Tagify for Subcategories immediately (even before category is selected)
+        function createTagifySubcategory(subcategories = []) {
+            tagifySubcategory = new Tagify(subcategoryInput, {
+                whitelist: subcategories,
+                userInput: false,
+                placeholder: "เลือกหมวดหมู่ย่อย...",
+                enforceWhitelist: true,
             });
 
-        // ============================
-        //    Update Subcategories
-        // ============================
+            // Handle tag changes
+            tagifySubcategory.on('change', handleSubcategoryChange);
+            tagifySubcategory.on('remove', handleSubcategoryRemove);
+        }
 
-        function updateSubcategories(selectedCategoryId) {
-            if (!selectedCategoryId) {
-                tagifySubcategory.settings.whitelist = [];
-                tagifySubcategory.removeAllTags();
-                tagifySubcategory._updateSettings();
+        function updateSubcategories(categoryId) {
+            if (!categoryId) {
+                clearSubcategories();
                 return;
             }
 
-            const filteredSubcategories = subcategory.filter(item => item.category === selectedCategoryId);
+            fetch(`ajax/get_subcategory.php?category_id=${categoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        console.warn("No subcategories found for this category.");
+                        clearSubcategories();
+                        return;
+                    }
 
-            tagifySubcategory.settings.whitelist = filteredSubcategories.map(item => item.value);
-            tagifySubcategory.removeAllTags();
-            tagifySubcategory._updateSettings();
+                    const subcategories = data.map(item => ({
+                        value: item.value,
+                        id: String(item.id), // Ensure ID is a string
+                    }));
+
+                    // Update Tagify whitelist
+                    tagifySubcategory.settings.whitelist = subcategories;
+                    tagifySubcategory.removeAllTags(); // Clear existing tags
+                    tagifySubcategory.dropdown.hide(); // Hide the dropdown until categories are fetched
+
+                    // Add initial subcategories (from PHP session or input field)
+                    addInitialSubcategories(subcategories);
+                })
+                .catch(error => console.error('Error fetching subcategories:', error));
+        }
+
+        // Create Tagify for Subcategories on page load, with an empty whitelist initially
+        createTagifySubcategory();
+
+        // Add initial subcategories from PHP session
+        function addInitialSubcategories(subcategories) {
+            // Retrieve initial subcategory values from PHP session (or input field)
+            const initialSubCategoryIds = subcategoryIdField.value.split(',').map(id => id.trim());
+            initialSubCategoryIds.forEach(id => {
+                const initialSubCategory = subcategories.find(cat => cat.id === id);
+                if (initialSubCategory) {
+                    tagifySubcategory.addTags([{
+                        value: initialSubCategory.value,
+                        id: initialSubCategory.id
+                    }]);
+                } else {
+                    console.warn(`Subcategory with ID ${id} not found.`);
+                }
+            });
+        }
+
+        // Handle subcategory tag changes
+        function handleSubcategoryChange(e) {
+            const selectedTags = JSON.parse(e.detail.value) || [];
+            const selectedIds = selectedTags.map(tag => tag.id);
+
+            subcategoryIdInput.value = selectedIds.join(','); // อัปเดต hidden input
+        }
+
+        // Handle subcategory tag removal
+        function handleSubcategoryRemove(e) {
+            const removedTag = e.detail.data;
+            const currentIds = subcategoryIdInput.value.split(',').filter(id => id !== removedTag.id);
+            subcategoryIdInput.value = currentIds.join(',');
+        }
+
+        // Clear subcategories
+        function clearSubcategories() {
+            if (tagifySubcategory) {
+                tagifySubcategory.settings.whitelist = [];
+                tagifySubcategory.removeAllTags();
+            }
+            subcategoryIdInput.value = ''; // Clear hidden input
         }
     </script>
+
 
 
     <script>
@@ -1052,21 +1140,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include "../../db/connection.php";
 session_start();
 
-
 // ตรวจสอบว่ามีการส่งข้อมูลผ่าน POST หรือไม่
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['Insert_Project'])) {
 
-        
-        // var_dump($_POST);
-        var_dump($_SESSION);
-        
         // รับค่าที่ส่งมาจากฟอร์ม
         $project_title = $_POST['project_title'];
         $project_detail = $_POST['project_detail'];
         $project_owner = $_POST['project_owner'];
         $cover_image_path = $_POST['cover_image'];
         $CreateBy_UserID = $_SESSION['User_ID'];
+        $category_id = $_POST['category_id'];
+        $subcategory = $_POST['subcategory_id']; // อาจจะเป็น array หรือไม่เป็น array
 
         // Remove the first occurrence of '../'
         $cover_image_path = preg_replace('/^(\.\.\/)/', '', $cover_image_path, 1);
@@ -1084,13 +1169,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Join the paths back into a single string
         $slideshow_image_path = implode(',', $image_paths);
 
-        // var_dump($cover_image_path);
-
         // แปลง JSON เป็น array
         $owner_data = json_decode($project_owner, true);
 
         if (is_array($owner_data)) {
-            echo "User_ID ทั้งหมด:\n";
             $user_ids = []; // สร้าง array เก็บ User_ID ทั้งหมด
 
             // วนลูปดึงค่า User_ID
@@ -1099,15 +1181,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $user_ids[] = $owner['User_ID']; // เก็บ User_ID ไว้ใน array
                 }
             }
-
-            // แสดงผลโดยคั่นด้วยเครื่องหมาย ,
-            echo implode(", ", $user_ids);
         } else {
             echo "ไม่สามารถแปลง JSON หรือไม่พบข้อมูล";
+            exit; // หยุดการทำงานหากไม่สามารถแปลง JSON
         }
 
         // ตรวจสอบค่าที่ได้รับจากฟอร์ม
-        if (empty($project_title) || empty($project_detail) || empty($project_owner)) {
+        if (empty($project_title) || empty($project_detail) || empty($project_owner) || empty($category_id) || empty($subcategory)) {
             echo "<script>
                 setTimeout(() => {
                     Swal.fire({
@@ -1161,13 +1241,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $stmt_user->close();
 
+                // เพิ่มการ INSERT ข้อมูล Category_ID และ Subcategory_ID ลงใน projectcategory
+                $sql_category = "INSERT INTO projectcategory (Project_ID, Category_ID, Subcategory_ID) VALUES (?, ?, ?)";
+                $stmt_category = $conn->prepare($sql_category);
+
+                // แยกค่า $subcategory_id จาก string ที่คั่นด้วยเครื่องหมาย ","
+                $subcategory_ids = explode(',', $subcategory); // จะได้ array เช่น [1, 2]
+
+                // วนลูปแทรกข้อมูล Subcategory_ID ที่แยกออกมา
+                foreach ($subcategory_ids as $subcategory_id) {
+                    $stmt_category->bind_param("iii", $project_id, $category_id, $subcategory_id);
+                    $stmt_category->execute();
+                }
+
+                $stmt_category->close();
+
+
                 // เคลียร์ session หลังจากบันทึกข้อมูลเสร็จ
-                session_start();
                 unset($_SESSION['cover_image']);
                 unset($_SESSION['project_title']);
                 unset($_SESSION['project_detail']);
                 unset($_SESSION['project_owner']);
                 unset($_SESSION['slideshow_image']);
+                unset($_SESSION['category']);
+                unset($_SESSION['category_id']);
+                unset($_SESSION['subcategory']);
+                unset($_SESSION['subcategory_id']);
 
                 // แจ้งเตือนด้วย SweetAlert สำหรับการบันทึกสำเร็จ
                 echo "<script>

@@ -57,11 +57,16 @@
 
                     <!-- BREADCRUMB -->
                     <div class="page-meta">
-                        <div class="flex justify-content-start">
-                            <!-- <button class="btn btn-light">
-                                <p class="title-form">ย้อนกลับ</p>
-                            </button> -->
-                            <h2 class="title-form">เพิ่มข้อมูลผู้ใช้งานใหม่</h2>
+                        <div class="d-flex justify-content-start mb-2">
+                            <!-- ปุ่มย้อนกลับ (ไม่มีสี) -->
+                            <a href="app-user-list.php" class="btn btn-outline-success btn-sm d-flex align-items-center px-2 py-1">
+                                <iconify-icon icon="iconamoon:arrow-left-2-light" width="20" height="20" class=""></iconify-icon>
+                                <span class="">ย้อนกลับ</span>
+                            </a>
+                        </div>
+
+                        <div class="d-flex justify-content-start">
+                            <h2 class="title-form">เพิ่มข้อมูลผู้ใช้ใหม่</h2>
                         </div>
                     </div>
                     <!-- /BREADCRUMB -->
@@ -73,161 +78,162 @@
                                 <form class="section general-info" method="POST" enctype="multipart/form-data">
                                     <div class="info">
                                         <div class="col-lg-11 mx-auto mt-5 mb-5">
-                                                <div class="row">
-                                                    <div class="col-xl-2 col-lg-12 col-md-4">
-                                                        <div class="profile-image  mt-4 pe-md-4">
-                                                            <div class="img-uploader-content">
-                                                                <input type="file"
-                                                                    class="filepond"
-                                                                    name="User_Profile"
-                                                                    id="User_Profile"
-                                                                    data-allow-reorder="true"
-                                                                    data-max-file-size="2MB"
-                                                                    data-max-files="1">
-                                                                <input type="text" id="profile_image" name="profile_image" class="form-control mt-2" readonly placeholder="Path ของไฟล์จะปรากฏที่นี่">
+                                            <div class="row">
+                                                <div class="col-xl-2 col-lg-12 col-md-4">
+                                                    <div class="profile-image  mt-4 pe-md-4">
+                                                        <div class="img-uploader-content">
+                                                            <input type="file"
+                                                                class="filepond"
+                                                                name="User_Profile"
+                                                                id="User_Profile"
+                                                                data-allow-reorder="true"
+                                                                data-max-file-size="2MB"
+                                                                data-max-files="1">
+                                                            <input type="hidden" id="profile_image" name="profile_image" class="form-control mt-2" readonly placeholder="Path ของไฟล์จะปรากฏที่นี่">
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-xl-10 col-lg-12 col-md-8 mt-md-0">
+                                                    <div class="form">
+                                                        <div class="row g-3">
+                                                            <div class="col-md-2">
+                                                                <div class="form-group">
+                                                                    <label for="User_Prefix">คำนำหน้าชื่อ</label>
+                                                                    <select class="form-select mb-3" id="User_Prefix" name="User_Prefix">
+                                                                        <option>คำนำหน้าชื่อ</option>
+                                                                        <option>นาย</option>
+                                                                        <option>นางสาว</option>
+                                                                        <option>นาง</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <label for="fullName">ชื่อ</label>
+                                                                    <input type="text" class="form-control mb-3" id="User_Firstname" name="User_Firstname" placeholder="กรุณาป้อนชื่อ">
+                                                                </div>
                                                             </div>
 
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-xl-10 col-lg-12 col-md-8 mt-md-0">
-                                                        <div class="form">
-                                                            <div class="row g-3">
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group">
-                                                                        <label for="User_Prefix">คำนำหน้าชื่อ</label>
-                                                                        <select class="form-select mb-3" id="User_Prefix" name="User_Prefix">
-                                                                            <option>คำนำหน้าชื่อ</option>
-                                                                            <option>นาย</option>
-                                                                            <option>นางสาว</option>
-                                                                            <option>นาง</option>
-                                                                        </select>
-                                                                    </div>
+                                                            <div class="col-md-5">
+                                                                <div class="form-group">
+                                                                    <label for="profession">นามสกุล</label>
+                                                                    <input type="text" class="form-control mb-3" id="User_Lastname" name="User_Lastname" placeholder="กรุณาป้อนนามสกุล">
                                                                 </div>
-                                                                <div class="col-md-5">
-                                                                    <div class="form-group">
-                                                                        <label for="fullName">ชื่อ</label>
-                                                                        <input type="text" class="form-control mb-3" id="User_Firstname" name="User_Firstname" placeholder="กรุณาป้อนชื่อ">
-                                                                    </div>
+                                                            </div>
+
+                                                            <div class="col-md-2">
+                                                                <div class="form-group">
+                                                                    <label for="User_Gender">เพศ</label>
+                                                                    <select class="form-select mb-3" id="User_Gender" name="User_Gender">
+                                                                        <option>เลือกเพศ</option>
+                                                                        <option>ชาย</option>
+                                                                        <option>หญิง</option>
+                                                                    </select>
                                                                 </div>
+                                                            </div>
 
-                                                                <div class="col-md-5">
-                                                                    <div class="form-group">
-                                                                        <label for="profession">นามสกุล</label>
-                                                                        <input type="text" class="form-control mb-3" id="User_Lastname" name="User_Lastname" placeholder="กรุณาป้อนนามสกุล">
-                                                                    </div>
+                                                            <div class="col-md-10">
+                                                                <div class="form-group">
+                                                                    <label for="address">วัน/เดือน/ปี เกิด</label>
+                                                                    <input id="rangeCalendarFlatpickr" class="form-control flatpickr flatpickr-input active" name="User_Birthday" type="text" placeholder="เลือกวัน/เดือน/ปีเกิด....">
                                                                 </div>
+                                                            </div>
+                                                            <?php
+                                                            include '../../db/connection.php';
 
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group">
-                                                                        <label for="User_Gender">เพศ</label>
-                                                                        <select class="form-select mb-3" id="User_Gender" name="User_Gender">
-                                                                            <option>เลือกเพศ</option>
-                                                                            <option>ชาย</option>
-                                                                            <option>หญิง</option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
+                                                            // ดึงข้อมูลแผนกจากตาราง department
+                                                            $query = "SELECT Department_ID, Department_Name FROM department";
+                                                            $result = $conn->query($query);
+                                                            ?>
 
-                                                                <div class="col-md-10">
-                                                                    <div class="form-group">
-                                                                        <label for="address">วัน/เดือน/ปี เกิด</label>
-                                                                        <input id="rangeCalendarFlatpickr" class="form-control flatpickr flatpickr-input active" name="User_Birthday" type="text" placeholder="เลือกวัน/เดือน/ปีเกิด....">
-                                                                    </div>
-                                                                </div>
-                                                                <?php
-                                                                include '../../db/connection.php';
-
-                                                                // ดึงข้อมูลแผนกจากตาราง department
-                                                                $query = "SELECT Department_ID, Department_Name FROM department";
-                                                                $result = $conn->query($query);
-                                                                ?>
-
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="User_DepartmentID">แผนก</label>
-                                                                        <select class="form-select mb-3" id="User_DepartmentID" name="User_DepartmentID">
-                                                                            <option value="">กรุณาเลือกแผนก</option>
-                                                                            <?php
-                                                                            if ($result->num_rows > 0) {
-                                                                                // แสดงตัวเลือกแผนกใน select
-                                                                                while ($row = $result->fetch_assoc()) {
-                                                                                    echo "<option value='{$row['Department_ID']}'>{$row['Department_Name']}</option>";
-                                                                                }
-                                                                            } else {
-                                                                                echo "<option value=''>ไม่มีข้อมูล</option>";
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="User_DepartmentID">แผนก</label>
+                                                                    <select class="form-select mb-3" id="User_DepartmentID" name="User_DepartmentID">
+                                                                        <option value="">กรุณาเลือกแผนก</option>
+                                                                        <?php
+                                                                        if ($result->num_rows > 0) {
+                                                                            // แสดงตัวเลือกแผนกใน select
+                                                                            while ($row = $result->fetch_assoc()) {
+                                                                                echo "<option value='{$row['Department_ID']}'>{$row['Department_Name']}</option>";
                                                                             }
-                                                                            ?>
-                                                                        </select>
-                                                                    </div>
+                                                                        } else {
+                                                                            echo "<option value=''>ไม่มีข้อมูล</option>";
+                                                                        }
+                                                                        ?>
+                                                                    </select>
                                                                 </div>
+                                                            </div>
 
-                                                                <?php
+                                                            <?php
 
-                                                                // ดึงข้อมูลแผนกจากตาราง position
-                                                                $query = "SELECT Position_ID, Position_Name FROM position";
-                                                                $result = $conn->query($query);
-                                                                ?>
+                                                            // ดึงข้อมูลแผนกจากตาราง position
+                                                            $query = "SELECT Position_ID, Position_Name FROM position";
+                                                            $result = $conn->query($query);
+                                                            ?>
 
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="User_PositionID">ตำแหน่ง</label>
-                                                                        <select class="form-select mb-3" id="User_PositionID" name="User_PositionID">
-                                                                            <option value="">กรุณาเลือกแผนก</option>
-                                                                            <?php
-                                                                            if ($result->num_rows > 0) {
-                                                                                // แสดงตัวเลือกแผนกใน select
-                                                                                while ($row = $result->fetch_assoc()) {
-                                                                                    echo "<option value='{$row['Position_ID']}'>{$row['Position_Name']}</option>";
-                                                                                }
-                                                                            } else {
-                                                                                echo "<option value=''>ไม่มีข้อมูล</option>";
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="User_PositionID">ตำแหน่ง</label>
+                                                                    <select class="form-select mb-3" id="User_PositionID" name="User_PositionID">
+                                                                        <option value="">กรุณาเลือกแผนก</option>
+                                                                        <?php
+                                                                        if ($result->num_rows > 0) {
+                                                                            // แสดงตัวเลือกแผนกใน select
+                                                                            while ($row = $result->fetch_assoc()) {
+                                                                                echo "<option value='{$row['Position_ID']}'>{$row['Position_Name']}</option>";
                                                                             }
-                                                                            ?>
-                                                                        </select>
-                                                                    </div>
+                                                                        } else {
+                                                                            echo "<option value=''>ไม่มีข้อมูล</option>";
+                                                                        }
+                                                                        ?>
+                                                                    </select>
                                                                 </div>
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="email">Email</label>
-                                                                        <input type="email" class="form-control mb-3" id="email" name="User_Email" placeholder="กรุณาป้อนอีเมล">
-                                                                    </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="email">Email</label>
+                                                                    <input type="email" class="form-control mb-3" id="email" name="User_Email" placeholder="กรุณาป้อนอีเมล">
                                                                 </div>
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="phone">เบอร์โทรศัพท์</label>
-                                                                        <input type="text" class="form-control mb-3" id="phone" name="User_Phone" placeholder="กรุณาป้อนเบอร์โทรศัพท์">
-                                                                    </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="phone">เบอร์โทรศัพท์</label>
+                                                                    <input type="text" class="form-control mb-3" id="phone" name="User_Phone" placeholder="กรุณาป้อนเบอร์โทรศัพท์">
                                                                 </div>
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="email">ชื่อผู้ใช้งาน</label>
-                                                                        <input type="text" class="form-control mb-3" id="email" name="Username" placeholder="กรุณาป้อนชื่อผู้ใช้">
-                                                                    </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="email">ชื่อผู้ใช้งาน</label>
+                                                                    <input type="text" class="form-control mb-3" id="email" name="Username" placeholder="กรุณาป้อนชื่อผู้ใช้">
                                                                 </div>
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group position-relative">
-                                                                        <label for="password">รหัสผ่าน</label>
-                                                                        <input type="password" class="form-control mb-3 pe-5" id="password" name="Password" placeholder="กรุณาป้อนรหัสผ่าน">
-                                                                        <!-- Iconify icon for eye-off initially -->
-                                                                        <iconify-icon icon="fluent:eye-off-20-regular" width="24" height="24" class="position-absolute top-50 end-0 me-3" id="passwordIcon" style="cursor: pointer;"></iconify-icon>
-                                                                    </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group position-relative">
+                                                                    <label for="password">รหัสผ่าน</label>
+                                                                    <input type="password" class="form-control mb-3 pe-5" id="password" name="Password" placeholder="กรุณาป้อนรหัสผ่าน">
+                                                                    <!-- Iconify icon for eye-off initially -->
+                                                                    <iconify-icon icon="fluent:eye-off-20-regular" width="24" height="24" class="position-absolute top-50 end-0 me-3" id="passwordIcon" style="cursor: pointer;"></iconify-icon>
                                                                 </div>
+                                                            </div>
 
-                                                                <div class="col-md-12 mt-4 d-flex justify-content-end ">
-                                                                    <!-- <div class="form-group text-end">
+                                                            <div class="col-md-12 mt-4 d-flex justify-content-end ">
+                                                                <!-- <div class="form-group text-end">
                                                                         <button class="btn btn-success d-flex align-items-center justify-content-center" type="submit" name="Insert_User">
                                                                             <iconify-icon icon="fluent:save-20-regular" width="24" height="24" class="me-1"></iconify-icon>
                                                                             <span class="btn-text-inner form-title">บันทึกข้อมูล</span>
                                                                         </button>
                                                                     </div> -->
-                                                                    <button type="submit" name="Insert_User" class="btn btn-success">กดเลย</button>
-                                                                </div>
-
+                                                                <button type="submit" name="Insert_User" class="btn btn-success d-flex align-items-center justify-content-center">
+                                                                    <iconify-icon icon="bx:save" width="24" height="24" class="me-1"></iconify-icon>
+                                                                    <span class="btn-text-inner form-title">บันทึกข้อมูล</span>
+                                                                </button>
                                                             </div>
-
                                                         </div>
                                                     </div>
                                                 </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </form>
@@ -268,7 +274,6 @@
     <script src="../src/plugins/src/filepond/FilePondPluginImageTransform.min.js"></script>
     <script src="../src/plugins/src/filepond/filepondPluginFileValidateSize.min.js"></script>
     <script src="../src/plugins/src/notification/snackbar/snackbar.min.js"></script>
-    <script src="../src/plugins/src/sweetalerts2/sweetalerts2.min.js"></script>
     <script src="../src/assets/js/users/account-settings.js"></script>
 
     <script src="../src/plugins/src/flatpickr/flatpickr.js"></script>
@@ -284,7 +289,7 @@
 
 
     <script>
-        let uploadedFilePath = '';  // ตัวแปรเก็บ path ของไฟล์ที่อัปโหลด
+        let uploadedFilePath = ''; // ตัวแปรเก็บ path ของไฟล์ที่อัปโหลด
 
         FilePond.registerPlugin(FilePondPluginFileValidateType, FilePondPluginImageExifOrientation, FilePondPluginImagePreview, FilePondPluginImageCrop, FilePondPluginImageResize, FilePondPluginImageTransform);
 
@@ -396,8 +401,6 @@ include '../../db/connection.php';
 
 if (isset($_POST['Insert_User'])) {
 
-    // var_dump($_POST);
-
     $profile_image = $_POST['profile_image'] ?? '';
     $profile_image = preg_replace('/^(\.\.\/)/', '', $profile_image);
 
@@ -422,19 +425,45 @@ if (isset($_POST['Insert_User'])) {
     $year_ad = (int)$year_be - 543;
 
     // Reformat to YYYY-MM-DD
-    $formatted_birthday = sprintf('%04d-%02d-%02d', $year_ad, $month, $day);    $user_email = $_POST['User_Email'] ?? '';
+    $formatted_birthday = sprintf('%04d-%02d-%02d', $year_ad, $month, $day);
 
-    $result = $conn->query("SELECT MAX(User_ID) AS max_id FROM user WHERE User_ID LIKE 'Off_Efin%'");
-    $new_id = 'Off_Efin001';
+    $user_email = $_POST['User_Email'] ?? '';
+
+    // Query to get the highest User_ID that starts with 'Office_Intern'
+    $result = $conn->query("SELECT MAX(User_ID) AS max_id FROM user WHERE User_ID LIKE 'Office_Efin%'");
+    $new_id = 'Office_Efin001'; // Default ID if no records found
+
     if ($result && $row = $result->fetch_assoc()) {
         if ($row['max_id']) {
-            $last_id_number = (int)substr($row['max_id'], 8);
-            $new_id = 'Off_Efin' . str_pad($last_id_number + 1, 3, '0', STR_PAD_LEFT);
+            // Get the last ID number and increment by 1
+            $last_id_number = (int)substr($row['max_id'], 13); // Remove "Office_Intern" prefix
+            $new_id = 'Office_Efin' . str_pad($last_id_number + 1, 3, '0', STR_PAD_LEFT); // Add leading zeros
         }
+    }
+
+    // Check if the generated ID already exists in the database
+    $check_id_query = $conn->prepare("SELECT COUNT(*) FROM user WHERE User_ID = ?");
+    $check_id_query->bind_param("s", $new_id);
+    $check_id_query->execute();
+    $check_id_query->bind_result($count);
+    $check_id_query->fetch();
+    $check_id_query->close();
+
+    // If the ID exists, generate a new one until it's unique
+    while ($count > 0) {
+        $last_id_number = (int)substr($new_id, 13); // Remove "Office_Intern" prefix
+        $new_id = 'Office_Efin' . str_pad($last_id_number + 1, 3, '0', STR_PAD_LEFT); // Increment the ID
+        $check_id_query = $conn->prepare("SELECT COUNT(*) FROM user WHERE User_ID = ?");
+        $check_id_query->bind_param("s", $new_id);
+        $check_id_query->execute();
+        $check_id_query->bind_result($count);
+        $check_id_query->fetch();
+        $check_id_query->close();
     }
 
     $user_type = 'officer';
 
+    // Prepare the INSERT statement
     $stmt = $conn->prepare("
         INSERT INTO `user` (
             `User_ID`, `User_Image`, `User_Prefix`, `User_Firstname`, 
@@ -461,26 +490,28 @@ if (isset($_POST['Insert_User'])) {
         $user_type
     );
 
-    if ($stmt->execute()) {
-        echo "<script>
+    if ($stmt->execute()) { ?>
+        <script>
             Swal.fire({
                 icon: 'success',
                 title: 'สำเร็จ!',
-                text: 'บันทึกข้อมูลสำเร็จ'
+                text: 'บันทึกข้อมูลสำเร็จ',
                 timer: 3000,
                 showConfirmButton: false
             }).then(() => {
                 window.location.href = 'app-user-list.php';
             });
-        </script>";
-    } else {
-        echo "<script>
+        </script>
+    <?php
+    } else { ?>
+        <script>
             Swal.fire({
                 icon: 'error',
                 title: 'เกิดข้อผิดพลาด',
-                text: 'ไม่สามารถบันทึกข้อมูลได้: {$stmt->error}'
+                text: 'ไม่สามารถบันทึกข้อมูลได้: <?php echo $stmt->error; ?>'
             });
-        </script>";
+        </script>
+<?php
     }
 
     $stmt->close();

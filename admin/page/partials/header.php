@@ -22,7 +22,7 @@
 <link href="../src/assets/css/light/components/tabs.css" rel="stylesheet" type="text/css">
 <link rel="stylesheet" type="text/css" href="../src/assets/css/light/elements/alert.css">
 
-<link href="../src/plugins/css/light/sweetalerts2/custom-sweetalert.css" rel="stylesheet" type="text/css" />
+<!-- <link href="../src/plugins/css/light/sweetalerts2/custom-sweetalert.css" rel="stylesheet" type="text/css" /> -->
 <link href="../src/plugins/css/light/notification/snackbar/custom-snackbar.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" type="text/css" href="../src/assets/css/light/forms/switches.css">
 <link href="../src/assets/css/light/components/list-group.css" rel="stylesheet" type="text/css">

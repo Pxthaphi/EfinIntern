@@ -1,13 +1,13 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+//---- เชื่อมต่อ Database ----//
+include '../../../db/connection.php';
 
 //---- รับชื่อไฟล์และประเภทมาจาก Path ----//
 $file_name = $_GET['file'] ?? '';
 $type = $_GET['type'] ?? '';
 
-//---- เชื่อมต่อ Database ----//
-include '../../../db/connection.php';
 
 //---- ส่งชื่อไฟล์สำหรับลบเมื่อปิดหน้าเว็บ ----//
 $_SESSION['file_to_delete'] = $file_name;
@@ -16,68 +16,41 @@ $_SESSION['file_to_delete'] = $file_name;
 if ($file_name && file_exists('data/' . $file_name)) {
 	$projectData = json_decode(file_get_contents('data/' . $file_name), true);
 
+	// var_dump($projectData);
+
 	//---- รับข้อมูลมาเก็บในแต่ละตัวแปร ----//
 	$project_id = $projectData['project_id'] ?? '';
 	$projectCover = $projectData['project_cover'] ?? '';
 	$projectName = $projectData['project_title'] ?? 'ไม่มีชื่อโปรเจค';
 	$projectDescription = $projectData['project_description'] ?? 'ไม่มีรายละเอียด';
+	$projectDescription_old = $projectData['project_description'] ?? 'ไม่มีรายละเอียด';
 	$projectOwner = $projectData['project_owner'] ?? 'ไม่มีเจ้าของโปรเจค';
 	$projectSlideshow = $projectData['project_slideshow'] ?? '';
+	$projectSlideshow_old = $projectData['project_slideshow'] ?? '';
 	$ProjectCategory = $projectData['Project_category'] ?? '';
 	$ProjectSubcategory = $projectData['Project_subcategory'] ?? '';
+	$Category_restore = $projectData['category'] ?? '';
+	$Subcategory_restore = $projectData['subcategory'] ?? '';
+	$Last_Project = $projectData['Last_Project'] ?? '';
+	$Preview = $projectData['preview'] ?? '';
 
-	//---- แปลงข้อมูล project_owner จาก JSON string เป็น Array ----//
-	$projectOwnerArray = json_decode($projectOwner, true);
+	// แปลง JSON เป็น array
+	$owner_data = json_decode($projectOwner, true);
 
-	//---- ดึงค่า User_ID จาก project_owner ----//
-	$userID = $projectOwnerArray[0]['User_ID'] ?? '';
+	if (is_array($owner_data)) {
+		// echo "User_ID ทั้งหมด:\n";
+		$user_ids = []; // สร้าง array เก็บ User_ID ทั้งหมด
 
-	//---------- ขั้นตอนการดึงข้อมูลจากตาราง User เพื่อเอามาแสดงที่ Project Owner ------------ //
-	$query = "SELECT user.User_ID, user.User_Image, user.User_Prefix, user.User_Firstname, user.User_Lastname, position.Position_Name
-            FROM `user` 
-            JOIN position ON user.User_PositionID = position.Position_ID 
-            WHERE User_ID = ?";
-
-	$stmt = mysqli_prepare($conn, $query);
-	if ($stmt === false) {
-		die("Query preparation failed: " . mysqli_error($conn));
-	}
-
-	mysqli_stmt_bind_param($stmt, "s", $userID);
-
-	mysqli_stmt_execute($stmt);
-
-	$result = mysqli_stmt_get_result($stmt);
-
-	// Fetch data
-	if (mysqli_num_rows($result) > 0) {
-		while ($row = mysqli_fetch_assoc($result)) {
-			$User_ID = $row['User_ID'];
-			$User_Image = "../" . $row['User_Image'];
-			$userPrefix = $row['User_Prefix'];
-			$userFirstName = $row['User_Firstname'];
-			$userLastName = $row['User_Lastname'];
-			$userPosition = $row['Position_Name'];
+		// วนลูปดึงค่า User_ID
+		foreach ($owner_data as $owner) {
+			if (isset($owner['User_ID'])) {
+				$user_ids[] = $owner['User_ID']; // เก็บ User_ID ไว้ใน array
+			}
 		}
+		// แสดงผลโดยคั่นด้วยเครื่องหมาย ,
+		// echo implode(", ", $user_ids);
 	} else {
-		echo "No results found.";
-	}
-	mysqli_stmt_close($stmt);
-
-	//---------- สิ้นสุดขั้นตอนการดึงข้อมูลจากตาราง User เพื่อเอามาแสดงที่ Project Owner ------------ //
-
-	//---- ถ้าเป็นหน้าเพิ่มข้อมูล เมื่อกดย้อนกลับให้ส่งข้อมูลไปแสดงเหมือนเดิม ----//
-	if ($type == "add") {
-		$redirect = "../app-blog-create.php";
-		$_SESSION['cover_image'] = $projectCover;
-		$_SESSION['project_title'] = $projectName;
-		$_SESSION['project_detail'] = $projectDescription;
-		$_SESSION['project_owner'] = $projectOwner;
-		$_SESSION['slideshow_image'] = $projectSlideshow;
-	} else if ($type == "edit") {
-		$redirect = "../app-blog-edit.php?project_id=$project_id";
-	} else {
-		$redirect = "../app-blog-list.php";
+		echo "ไม่สามารถแปลง JSON หรือไม่พบข้อมูล";
 	}
 
 	//---- เพิ่ม ../ajax/ ข้างหน้า Path เดิม ----//
@@ -102,16 +75,8 @@ if ($file_name && file_exists('data/' . $file_name)) {
 	$projectDescription = preg_replace('/<ol([^>]*)>/', '<ul$1>', $projectDescription);
 	$projectDescription = str_replace('</ol>', '</ul>', $projectDescription);
 
-	// //---------- ขั้นตอนแปลงและดึงข้อมูล Category และ Subcategory ------------ //
-	// $categoryData = json_decode($ProjectCategory, true);
-	// $subcategoryData = json_decode($ProjectSubcategory, true);
-
 	$categoryId = $ProjectCategory;
 	$subcategoryId = $ProjectSubcategory;
-
-	// //---- ดึงเอาเฉพาะ ID ของ Category และ Subcategory ----//
-	// $categoryId = isset($categoryData[0]['id']) ? $categoryData[0]['id'] : null;
-	// $subcategoryId = isset($subcategoryData[0]['id']) ? $subcategoryData[0]['id'] : null;
 
 	if ($categoryId && $subcategoryId) {
 		$query_category = "SELECT category.Category_Name, subcategory.Subcategory_Name 
@@ -125,7 +90,6 @@ if ($file_name && file_exists('data/' . $file_name)) {
 		}
 
 		mysqli_stmt_bind_param($stmt, "ii", $categoryId, $subcategoryId);
-
 		mysqli_stmt_execute($stmt);
 
 		$result_category = mysqli_stmt_get_result($stmt);
@@ -141,14 +105,65 @@ if ($file_name && file_exists('data/' . $file_name)) {
 		mysqli_stmt_close($stmt);
 	}
 
-	mysqli_close($conn);
+	//---- ถ้าเป็นหน้าเพิ่มข้อมูล เมื่อกดย้อนกลับให้ส่งข้อมูลไปแสดงเหมือนเดิม ----//
 
-	//---------- สิ้นสุดขั้นตอนแปลงและดึงข้อมูล Category และ Subcategory ------------ //
+	// เก็บข้อมูลผู้ใช้งานที่เกี่ยวข้องกับโปรเจค
+	$user_data = json_decode($projectOwner, true);
 
+	if (is_array($user_data)) {
+		// echo "ข้อมูลผู้ใช้ทั้งหมด:\n";
+
+		$user_details = [];  // Create an array to store user details
+
+		// วนลูปดึงค่า User_ID, FirstName, LastName, Image และ Position
+		foreach ($user_data as $users) {
+			if (isset($users['User_ID'], $users['User_FirstName'], $users['User_Lastname'], $users['User_Image'], $users['Position_Name'])) {
+				// Add each user's data to the user_details array
+				$user_details[] = [
+					'User_ID' => $users['User_ID'],
+					'User_FirstName' => $users['User_FirstName'],
+					'User_Lastname' => $users['User_Lastname'],
+					'User_Image' => $users['User_Image'],
+					'Position_Name' => $users['Position_Name']
+				];
+			}
+		}
+	} else {
+		echo "ไม่สามารถแปลง JSON หรือไม่พบข้อมูล";
+	}
+
+	if ($type == "add") {
+		$redirect = "../app-blog-create.php";
+		$_SESSION['cover_image'] = $projectCover;
+		$_SESSION['project_title'] = $projectName;
+		$_SESSION['project_detail'] = $projectDescription;
+		$_SESSION['project_owner'] = $user_details;
+		$_SESSION['slideshow_image'] = $projectSlideshow;
+		$_SESSION['category_id'] = $categoryId;
+		$_SESSION['subcategory_id'] = $subcategoryId;
+		$_SESSION['category'] = $Category_restore;
+		$_SESSION['subcategory'] = $Subcategory_restore;
+	} else if ($type == "edit") {
+		$redirect = "../app-blog-edit.php?Project_ID=$project_id";
+		$_SESSION['cover_image'] = $projectCover;
+		$_SESSION['project_title'] = $projectName;
+		$_SESSION['project_detail'] = $projectDescription_old;
+		$_SESSION['project_owner'] = $user_details;
+		$_SESSION['slideshow_image'] = $projectSlideshow_old;
+		$_SESSION['category_id'] = $categoryId;
+		$_SESSION['subcategory_id'] = $subcategoryId;
+		$_SESSION['category'] = $Category_restore;
+		$_SESSION['subcategory'] = $Subcategory_restore;
+		$_SESSION['last_project_id'] = $Last_Project;
+		$_SESSION['Preview'] = $Preview;
+	} else {
+		$redirect = "../app-blog-list.php";
+	}
 } else {
 	echo "ไม่พบข้อมูลโปรเจค.";
 }
 ?>
+
 
 
 <!doctype html>
@@ -240,7 +255,7 @@ if ($file_name && file_exists('data/' . $file_name)) {
 									ย้อนกลับ
 								</a>
 								<h1 class="text-white"><?= $projectName ?></h1>
-								<h5 class="text-white">#<?= $Subcategory?></h5>
+								<h5 class="text-white">#<?= $Subcategory ?></h5>
 							</div>
 						</div>
 					</div>
@@ -291,21 +306,58 @@ if ($file_name && file_exists('data/' . $file_name)) {
 				<div class="container">
 					<div class="wrapper-navprofile">
 						<div class="d-flex mini-profile">
-							<div class="miximg-name d-flex flex-row">
-								<img src="<?= $User_Image ?>" alt=""
-									class="rounded-circle"
-									style="width: 50px; height: 50px;">
-								<div class="navigation-profile">
-									<h6><?= htmlspecialchars($userPrefix . '' . $userFirstName . ' ' . $userLastName) ?></h6>
-									<p><?= htmlspecialchars($userPosition) ?></p>
-									<a href="#" class="click-watchall d-flex align-items-center">
-										<h5 class="fw-light">ดูผลงานทั้งหมด</h5>
-										<div class="arrowfix1">
-											<img src="../../../assets/images/port_img/arrow_green.png" alt="">
-										</div>
-									</a>
-								</div>
-							</div>
+							<?php
+							//---------- ขั้นตอนการดึงข้อมูลจากตาราง User เพื่อเอามาแสดงที่ Project Owner ------------ //
+							if (!empty($user_ids)) {
+								$query = "SELECT user.User_ID, user.User_Image, user.User_Prefix, user.User_Firstname, user.User_Lastname, position.Position_Name
+											FROM `user` 
+											JOIN position ON user.User_PositionID = position.Position_ID 
+											WHERE User_ID = ?";
+
+								$stmt = mysqli_prepare($conn, $query);
+
+								if ($stmt === false) {
+									die("Query preparation failed: " . mysqli_error($conn));
+								}
+
+								foreach ($user_ids as $single_user_id) {
+									mysqli_stmt_bind_param($stmt, "s", $single_user_id);
+									mysqli_stmt_execute($stmt);
+									$result = mysqli_stmt_get_result($stmt);
+
+									if (mysqli_num_rows($result) > 0) {
+										while ($row = mysqli_fetch_assoc($result)) {
+											$User_ID = $row['User_ID'];
+											$User_Image = "../" . $row['User_Image'];
+											$userPrefix = $row['User_Prefix'];
+											$userFirstName = $row['User_Firstname'];
+											$userLastName = $row['User_Lastname'];
+											$userPosition = $row['Position_Name'];
+							?>
+											<div class="miximg-name d-flex flex-row">
+												<img src="<?= $User_Image ?>" alt=""
+													class="rounded-circle"
+													style="width: 50px; height: 50px;">
+												<div class="navigation-profile">
+													<h6><?= htmlspecialchars($userPrefix . '' . $userFirstName . ' ' . $userLastName) ?></h6>
+													<p><?= htmlspecialchars($userPosition) ?></p>
+													<a href="#" class="click-watchall d-flex align-items-center">
+														<h5 class="fw-light">ดูผลงานทั้งหมด</h5>
+														<div class="arrowfix1">
+															<img src="../../../assets/images/port_img/arrow_green.png" alt="">
+														</div>
+													</a>
+												</div>
+											</div>
+							<?php 			// echo "User_ID: $User_ID, Name: $userPrefix $userFirstName $userLastName, Position: $userPosition<br>";
+										}
+									} else {
+										echo "No results found for User_ID: $single_user_id<br>";
+									}
+								}
+
+								mysqli_stmt_close($stmt);
+							} ?>
 						</div>
 					</div>
 				</div>

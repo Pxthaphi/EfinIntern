@@ -19,6 +19,7 @@
     <link href="../src/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="../layouts/modern-light-menu/css/light/plugins.css" rel="stylesheet" type="text/css" />
     <link href="../layouts/modern-light-menu/css/dark/plugins.css" rel="stylesheet" type="text/css" />
+    <script src="../src/icontify/iconify-icon.min.js"></script>
     <!-- END GLOBAL MANDATORY STYLES -->
 
     <!--  BEGIN CUSTOM STYLE FILE  -->
@@ -63,29 +64,12 @@
 
                 <div class="middle-content container-xxl p-0">
 
-                    <!-- BREADCRUMB -->
-                    <div class="page-meta">
-                        <nav class="breadcrumb-style-one" aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="#">App</a></li>
-                                <li class="breadcrumb-item"><a href="#">Blog</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">Post</li>
-                            </ol>
-                        </nav>
-                    </div>
-                    <!-- /BREADCRUMB -->
+                    <?php
+                    $Project_ID = $_GET['Project_ID'] ?? '';
 
+                    include '../../db/connection.php';
 
-
-                    <div class="row layout-top-spacing">
-
-                        <div class="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-4">
-                            <?php
-                            $Project_ID = $_GET['Project_ID'] ?? '';
-
-                            include '../../db/connection.php';
-
-                            $sql = "SELECT project.*, 
+                    $sql = "SELECT project.*, 
                                             GROUP_CONCAT(projectimages.ProjectImages_ID) AS ProjectImages_IDs, 
                                             GROUP_CONCAT(projectimages.Cover_Path) AS Cover_Paths, 
                                             GROUP_CONCAT(projectimages.Slideshow_Path) AS Slideshow_Paths,
@@ -100,35 +84,58 @@
                                     WHERE project.Project_ID = ?
                                     GROUP BY project.Project_ID";
 
-                            $stmt = $conn->prepare($sql);
+                    $stmt = $conn->prepare($sql);
 
-                            $stmt->bind_param("s", $Project_ID);
-                            $stmt->execute();
-                            $result = $stmt->get_result();
+                    $stmt->bind_param("s", $Project_ID);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
 
-                            if ($result->num_rows > 0) {
-                                $row = $result->fetch_assoc();
+                    if ($result->num_rows > 0) {
+                        $row = $result->fetch_assoc();
 
-                                $coverPaths = $row['Cover_Paths'];
-                                $slideshowPaths = $row['Slideshow_Paths'];
-                                $userImages = $row['User_Images'];
-                                $userIDs = $row['User_IDs'];
-                                $internStartDates = $row['Intern_StartDates'];
-                                $projectDescription = $row['Project_Detail'];
+                        $ProjectTitle = $row['Project_Title'];
+                        $coverPaths = $row['Cover_Paths'];
+                        $slideshowPaths = $row['Slideshow_Paths'];
+                        $userImages = $row['User_Images'];
+                        $userIDs = $row['User_IDs'];
+                        $internStartDates = $row['Intern_StartDates'];
+                        $projectDescription = $row['Project_Detail'];
 
-                                $coverPathsArray = explode(',', $coverPaths);
-                                $slideshowPathsArray = explode(',', $slideshowPaths);
-                                $userImagesArray = explode(',', $userImages);
-                                $userIDsArray = explode(',', $userIDs);
-                                $internStartDatesArray = explode(',', $internStartDates);
+                        $coverPathsArray = explode(',', $coverPaths);
+                        $slideshowPathsArray = explode(',', $slideshowPaths);
+                        $userImagesArray = explode(',', $userImages);
+                        $userIDsArray = explode(',', $userIDs);
+                        $internStartDatesArray = explode(',', $internStartDates);
 
-                                //---- แปลง Tag html จาก <ol> เป็น <ul> ----//
-                                $projectDescription = preg_replace('/<ol([^>]*)>/', '<ul$1>', $projectDescription);
-                                $projectDescription = str_replace('</ol>', '</ul>', $projectDescription);
-                            } else {
-                                echo "No project found.";
-                            }
-                            ?>
+                        //---- แปลง Tag html จาก <ol> เป็น <ul> ----//
+                        $projectDescription = preg_replace('/<ol([^>]*)>/', '<ul$1>', $projectDescription);
+                        $projectDescription = str_replace('</ol>', '</ul>', $projectDescription);
+                    } else {
+                        echo "No project found.";
+                    }
+                    ?>
+
+                    <!-- BREADCRUMB -->
+                    <div class="page-meta">
+                        <div class="d-flex justify-content-start mb-2">
+                            <!-- ปุ่มย้อนกลับ (ไม่มีสี) -->
+                            <a href="javascript:history.back()" class="btn btn-outline-success btn-sm d-flex align-items-center px-2 py-1">
+                                <iconify-icon icon="iconamoon:arrow-left-2-light" width="20" height="20" class=""></iconify-icon>
+                                <span class="">ย้อนกลับ</span>
+                            </a>
+                        </div>
+
+                        <div class="d-flex justify-content-start">
+                            <h2 class="title-form"><?= $ProjectTitle ?></h2>
+                        </div>
+                    </div>
+                    <!-- /BREADCRUMB -->
+
+
+
+                    <div class="row layout-top-spacing">
+
+                        <div class="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-4">
 
                             <div class="single-post-content">
 

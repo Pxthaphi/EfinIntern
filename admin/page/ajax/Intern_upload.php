@@ -25,10 +25,10 @@ if (isset($_FILES['User_Profile']) && $_FILES['User_Profile']['error'] == 0) {
     // ตรวจสอบประเภทไฟล์
     if (in_array($fileType, ['image/jpeg', 'image/png'])) {
         // ดึงข้อมูล User_ID ล่าสุดจากฐานข้อมูล
-        $sql = "SELECT User_ID FROM user WHERE User_ID LIKE 'Office_Efin%' ORDER BY User_ID DESC LIMIT 1";
+        $sql = "SELECT User_ID FROM user WHERE User_ID LIKE 'Intern_Efin%' ORDER BY User_ID DESC LIMIT 1";
         $result = $conn->query($sql);
 
-        $userID = 'Office_Efin001'; // ค่าตั้งต้น หากยังไม่มีข้อมูลในฐานข้อมูล
+        $userID = 'Intern_Efin001'; // ค่าตั้งต้น หากยังไม่มีข้อมูลในฐานข้อมูล
 
         if ($result && $result->num_rows > 0) {
             $row = $result->fetch_assoc();

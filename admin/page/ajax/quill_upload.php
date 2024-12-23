@@ -1,7 +1,7 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Admin File From Folder uploads/quill
+    // ตรวจสอบการอัพโหลดไฟล์
     if (isset($_FILES['file'])) {
         $file = $_FILES['file'];
 
@@ -11,29 +11,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
+        // กำหนดเส้นทางสำหรับเก็บไฟล์
         $targetDir = __DIR__ . "../../../../assets/images/project/detail/";
-       // ถ้าโฟลเดอร์ไม่มีอยู่ให้สร้างใหม่
-       if (!is_dir($targetDir)) {
+        // ถ้าโฟลเดอร์ไม่มีอยู่ให้สร้างใหม่
+        if (!is_dir($targetDir)) {
             if (!mkdir($targetDir, 0777, true)) {
                 echo json_encode(["success" => false, "message" => "Failed to create directory."]);
                 exit;
             }
         }
 
-        // สร้างชื่อไฟล์ใหม่ที่ไม่ซ้ำกัน
-        $fileName = uniqid() . "-" . basename($file["name"]);
-        $targetFile = $targetDir . $fileName;
-
-        // ตรวจสอบประเภทไฟล์
-        $fileType = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        $validExtensions = ["jpg", "jpeg", "png"];
-        if (!in_array($fileType, $validExtensions)) {
-            echo json_encode(["success" => false, "message" => "Invalid file type."]);
+        // ตรวจสอบประเภทไฟล์ด้วย getimagesize()
+        $fileInfo = getimagesize($file['tmp_name']);
+        if ($fileInfo === false) {
+            echo json_encode(["success" => false, "message" => "Uploaded file is not a valid image."]);
             exit;
         }
 
+        // ดึงส่วนสกุลไฟล์
+        $fileExtension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
+
+        // ตรวจสอบว่าไฟล์เป็นรูปภาพประเภทที่อนุญาต
+        $validExtensions = ["jpg", "jpeg", "png"];
+        if (!in_array($fileExtension, $validExtensions)) {
+            echo json_encode(["success" => false, "message" => "Invalid file type. Only JPG, JPEG, and PNG are allowed."]);
+            exit;
+        }
+
+        // สร้างชื่อไฟล์ใหม่ที่ไม่ซ้ำกัน (ลบ .jpg, .png ออก)
+        $fileName = uniqid() . "_" . date("Y-m-d_H-i-s"); // ตั้งชื่อไฟล์ตาม uniqid() และเวลา
+
+        $targetFile = $targetDir . $fileName . "." . $fileExtension; // ตั้งชื่อไฟล์เริ่มต้นตามสกุลไฟล์เดิม
+
         // โหลดไฟล์ภาพตามประเภท
-        switch ($fileType) {
+        switch ($fileExtension) {
             case 'jpg':
             case 'jpeg':
                 $image = imagecreatefromjpeg($file['tmp_name']);
@@ -84,6 +95,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // ถ้าไฟล์มีขนาดไม่เกิน 300KB แล้ว
         if ($fileSize <= 300000) {
+            // ลบไฟล์เดิมที่ไม่ใช่ .webp
+            $originalFile = $targetDir . $fileName . '.' . $fileExtension;
+            if (file_exists($originalFile)) {
+                unlink($originalFile); // ลบไฟล์เดิม
+            }
+
             imagedestroy($image);
             imagedestroy($resizedImage);
             $relativePath = "../../../../assets/images/project/detail/" . basename($tempFile);
@@ -93,9 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             imagedestroy($resizedImage);
             echo json_encode(["success" => false, "message" => "Image too large to compress under 300KB."]);
         }
-
     } else {
         echo json_encode(["success" => false, "message" => "No file uploaded."]);
     }
-
 }
+?>

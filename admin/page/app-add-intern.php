@@ -57,11 +57,16 @@
 
                     <!-- BREADCRUMB -->
                     <div class="page-meta">
-                        <div class="flex justify-content-start">
-                            <!-- <button class="btn btn-light">
-                                <p class="title-form">ย้อนกลับ</p>
-                            </button> -->
-                            <h2 class="title-form">เพิ่มข้อมูลนักศึกษางานใหม่</h2>
+                        <div class="d-flex justify-content-start mb-2">
+                            <!-- ปุ่มย้อนกลับ (ไม่มีสี) -->
+                            <a href="app-intern-list.php" class="btn btn-outline-success btn-sm d-flex align-items-center px-2 py-1">
+                                <iconify-icon icon="iconamoon:arrow-left-2-light" width="20" height="20" class=""></iconify-icon>
+                                <span class="">ย้อนกลับ</span>
+                            </a>
+                        </div>
+
+                        <div class="d-flex justify-content-start">
+                            <h2 class="title-form">เพิ่มข้อมูลนักศึกษาฝึกงานใหม่</h2>
                         </div>
                     </div>
                     <!-- /BREADCRUMB -->
@@ -84,7 +89,7 @@
                                                                 data-allow-reorder="true"
                                                                 data-max-file-size="2MB"
                                                                 data-max-files="1">
-                                                            <input type="text" id="profile_image" name="profile_image" class="form-control mt-2" readonly placeholder="Path ของไฟล์จะปรากฏที่นี่">
+                                                            <input type="hidden" id="profile_image" name="profile_image" class="form-control mt-2" readonly placeholder="Path ของไฟล์จะปรากฏที่นี่">
                                                         </div>
 
                                                     </div>
@@ -254,7 +259,10 @@
                                                                             <span class="btn-text-inner form-title">บันทึกข้อมูล</span>
                                                                         </button>
                                                                     </div> -->
-                                                                <button type="submit" name="Insert_User" class="btn btn-success">กดเลย</button>
+                                                                <button type="submit" name="Insert_Intern" class="btn btn-success d-flex align-items-center justify-content-center">
+                                                                    <iconify-icon icon="bx:save" width="24" height="24" class="me-1"></iconify-icon>
+                                                                    <span class="btn-text-inner form-title">บันทึกข้อมูล</span>
+                                                                </button>
                                                             </div>
 
                                                         </div>
@@ -338,7 +346,7 @@
             maxFiles: 1,
             allowMultiple: false,
             server: {
-                process: 'ajax/profile_upload.php',
+                process: 'ajax/Intern_upload.php',
             },
             name: 'User_Profile',
             onprocessfile: (error, file) => {
@@ -440,9 +448,7 @@
 <?php
 include '../../db/connection.php';
 
-if (isset($_POST['Insert_User'])) {
-
-    // var_dump($_POST);
+if (isset($_POST['Insert_Intern'])) {
 
     $profile_image = $_POST['profile_image'] ?? '';
     $profile_image = preg_replace('/^(\.\.\/)/', '', $profile_image);
@@ -464,33 +470,55 @@ if (isset($_POST['Insert_User'])) {
     $day = $date_parts[0];
     $month = $date_parts[1];
     $year_be = $date_parts[2];
-
-    // Convert from Buddhist Era to Gregorian (subtract 543 years)
-    $year_ad = (int)$year_be - 543;
-
-    // Reformat to YYYY-MM-DD
+    $year_ad = (int)$year_be - 543; // Convert to Gregorian year
     $formatted_birthday = sprintf('%04d-%02d-%02d', $year_ad, $month, $day);
     $user_email = $_POST['User_Email'] ?? '';
 
+    // Query to get the highest User_ID that starts with 'Office_Intern'
     $result = $conn->query("SELECT MAX(User_ID) AS max_id FROM user WHERE User_ID LIKE 'Intern_Efin%'");
-    $new_id = 'Intern_Efin001';
+    $new_id = 'Intern_Efin001'; // Default ID if no records found
+
     if ($result && $row = $result->fetch_assoc()) {
         if ($row['max_id']) {
-            $last_id_number = (int)substr($row['max_id'], 8);
-            $new_id = 'Intern_Efin' . str_pad($last_id_number + 1, 3, '0', STR_PAD_LEFT);
+            // Get the last ID number and increment by 1
+            $last_id_number = (int)substr($row['max_id'], 13); // Remove "Office_Intern" prefix
+            $new_id = 'Intern_Efin' . str_pad($last_id_number + 1, 3, '0', STR_PAD_LEFT); // Add leading zeros
         }
+    }
+
+    // Check if the generated ID already exists in the database
+    $check_id_query = $conn->prepare("SELECT COUNT(*) FROM user WHERE User_ID = ?");
+    $check_id_query->bind_param("s", $new_id);
+    $check_id_query->execute();
+    $check_id_query->bind_result($count);
+    $check_id_query->fetch();
+    $check_id_query->close();
+
+    // If the ID exists, generate a new one until it's unique
+    while ($count > 0) {
+        $last_id_number = (int)substr($new_id, 13); // Remove "Office_Intern" prefix
+        $new_id = 'Intern_Efin' . str_pad($last_id_number + 1, 3, '0', STR_PAD_LEFT); // Increment the ID
+        $check_id_query = $conn->prepare("SELECT COUNT(*) FROM user WHERE User_ID = ?");
+        $check_id_query->bind_param("s", $new_id);
+        $check_id_query->execute();
+        $check_id_query->bind_result($count);
+        $check_id_query->fetch();
+        $check_id_query->close();
     }
 
     $user_type = 'intern';
 
+    // Prepare statement to insert user
     $stmt = $conn->prepare("
-        INSERT INTO `user` (
-            `User_ID`, `User_Image`, `User_Prefix`, `User_Firstname`, 
-            `User_Lastname`, `User_Gender`, `User_Birthday`, `User_Email`, 
-            `User_PhoneNumber`, `User_DepartmentID`, `User_PositionID`, `User_UniversityID`,  
-            `Username`, `Password`, `User_Type`
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
+    INSERT INTO `user` (
+        `User_ID`, `User_Image`, `User_Prefix`, `User_Firstname`, 
+        `User_Lastname`, `User_Gender`, `User_Birthday`, `User_Email`, 
+        `User_PhoneNumber`, `User_DepartmentID`, `User_PositionID`, `User_UniversityID`,  
+        `Username`, `Password`, `User_Type`
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+");
+
+    // Bind parameters
     $stmt->bind_param(
         "sssssssssiiisss",
         $new_id,
@@ -504,31 +532,57 @@ if (isset($_POST['Insert_User'])) {
         $user_phone,
         $user_department,
         $user_position,
+        $user_university,
         $username,
         $password,
         $user_type
     );
 
+
     if ($stmt->execute()) {
-        echo "<script>
+        // Insert intern data (start and end date)
+        $intern_start_end = $_POST['Intern_StartStop'] ?? ''; // Assuming this is in 'DD/MM/YYYY' format
+        $start_end_parts = explode(' ถึง ', $intern_start_end);
+        $intern_start_date = $start_end_parts[0] ?? '';
+        $intern_end_date = $start_end_parts[1] ?? '';
+
+        $date_parts_start = explode('/', $intern_start_date); // Split the date into day, month, year
+        $day = $date_parts_start[0];
+        $month = $date_parts_start[1];
+        $year_be = $date_parts_start[2];
+        $year_ad = (int)$year_be - 543; // Convert to Gregorian year
+        $formatted_startdate = sprintf('%04d-%02d-%02d', $year_ad, $month, $day);
+
+        $date_parts_enddate = explode('/', $intern_end_date); // Split the date into day, month, year
+        $day = $date_parts_enddate[0];
+        $month = $date_parts_enddate[1];
+        $year_be = $date_parts_enddate[2];
+        $year_ad = (int)$year_be - 543; // Convert to Gregorian year
+        $formatted_enddate = sprintf('%04d-%02d-%02d', $year_ad, $month, $day);
+
+        $stmt_intern = $conn->prepare("INSERT INTO `intern` (`User_ID`, `Intern_StartDate`, `Intern_EndDate`) VALUES (?, ?, ?)");
+        $stmt_intern->bind_param("sss", $new_id, $formatted_startdate, $formatted_enddate);
+        $stmt_intern->execute();
+
+        echo '<script>
             Swal.fire({
-                icon: 'success',
-                title: 'สำเร็จ!',
-                text: 'บันทึกข้อมูลสำเร็จ'
+                icon: "success",
+                title: "สำเร็จ!",
+                text: "บันทึกข้อมูลสำเร็จ",
                 timer: 3000,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = 'app-user-list.php';
+                window.location.href = "app-intern-list.php";
             });
-        </script>";
+        </script>';
     } else {
-        echo "<script>
+        echo '<script>
             Swal.fire({
-                icon: 'error',
-                title: 'เกิดข้อผิดพลาด',
-                text: 'ไม่สามารถบันทึกข้อมูลได้: {$stmt->error}'
+                icon: "error",
+                title: "เกิดข้อผิดพลาด",
+                text: "ไม่สามารถบันทึกข้อมูลได้: ' . $stmt->error . '"
             });
-        </script>";
+        </script>';
     }
 
     $stmt->close();
